@@ -5,3 +5,4 @@ __email__ = 'punkosdmarcell@rocketmail.com'
 __version__ = '0.1.0'
 
 from .pyopenvidu import OpenVidu, OpenViduSession, OpenViduConnection
+from .exceptions import OpenViduError, OpenViduSessionError, OpenViduSessionDoesNotExistsError, OpenViduConnectionError, OpenViduConnectionDoesNotExistsError

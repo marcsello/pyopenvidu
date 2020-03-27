@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-"""Tests for `pyopenvidu` package."""
+"""Tests for OpenVidu object"""
 
 import pytest
-from pyopenvidu import OpenVidu
+from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError
 from urllib.parse import urljoin
 
 URL_BASE = 'http://test.openvidu.io:4443/'
@@ -137,29 +137,8 @@ def test_session_raw(openvidu_instance, requests_mock):
 
     assert a == original
 
+def test_session_missing_session(openvidu_instance, requests_mock):
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json={}, status_code=404)
 
-def test_session(openvidu_instance, requests_mock):
-    original = {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED",
-                "recordingMode": "MANUAL", "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT",
-                "customSessionId": "TestSession", "connections": {"numberOfElements": 2, "content": [
-            {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
-             "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-             "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
-             "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
-                {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-                 "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
-                                  "typeOfVideo": "CAMERA", "frameRate": 30,
-                                  "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
-             "subscribers": []}, {"connectionId": "maxawd3ysuj1rxvq", "createdAt": 1538482607659, "location": "",
-                                  "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-                                  "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
-                                  "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
-                                  "subscribers": [
-                                      {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-                                       "publisher": "vhdxz7abbfirh2lh"}]}]}, "recording": False}
-
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=original)
-
-    session = openvidu_instance.get_session('TestSession')
-
-    assert session.id == 'TestSession'
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        openvidu_instance.get_session('TestSession')
