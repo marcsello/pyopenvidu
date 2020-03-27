@@ -4,5 +4,9 @@ __author__ = """Marcell Pünkösd"""
 __email__ = 'punkosdmarcell@rocketmail.com'
 __version__ = '0.1.0'
 
-from .pyopenvidu import OpenVidu, OpenViduSession, OpenViduConnection
-from .exceptions import OpenViduError, OpenViduSessionError, OpenViduSessionDoesNotExistsError, OpenViduConnectionError, OpenViduConnectionDoesNotExistsError
+from .openvidu import OpenVidu
+from .openvidusession import OpenViduSession
+from .openviduconnection import OpenViduConnection
+
+from .exceptions import OpenViduError, OpenViduSessionError, OpenViduSessionDoesNotExistsError, OpenViduConnectionError, \
+    OpenViduConnectionDoesNotExistsError
