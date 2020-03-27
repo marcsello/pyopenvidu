@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 from requests_toolbelt import user_agent
 
 from . import __version__
-from .exceptions import OpenViduSessionDoesNotExistsError
+from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
 
 
 class OpenViduConnection(object):
@@ -131,6 +131,57 @@ class OpenViduSession(object):
 
         return r.json()['token']
 
+    def get_connections(self) -> Iterator[OpenViduConnection]:
+        """
+        Returns the list of active connections to the session.
+
+        :return: A generator for OpenViduConnection objects.
+        """
+        for connection_info in self.get_connections_info():
+            yield OpenViduConnection(self._session, self._id, connection_info['connectionId'])
+
+    def get_connection(self, connection_id: str) -> OpenViduConnection:
+        """
+        Get a currently active connection to the server.
+
+        :param connection_id: Connection id.
+        :return: A OpenViduConnection objects.
+        """
+        self.get_connection_info(connection_id)  # This is used to raise the required exceptions...
+        return OpenViduConnection(self._session, self._id, connection_id)
+
+    def get_connections_info(self) -> dict:
+        """
+        Get the raw data returned by the server for the clients.
+        This function returns a subset of the get_info() call. This is implemented for consistency.
+
+        https://openvidu.io/docs/reference-docs/REST-API/#get-apisessionsltsession_idgt
+        :return: subset of the exact response from the server as a dict.
+        """
+        return self.get_info()['connections']['content']
+
+    def get_connection_info(self, connection_id: str) -> dict:
+        """
+        Get the raw data returned by the server for the clients.
+        This function returns a subset of the get_info() call. This is implemented for consistency.
+
+        https://openvidu.io/docs/reference-docs/REST-API/#get-apisessionsltsession_idgt
+        :return: subset of the exact response from the server as a dict.
+        """
+        for connection_info in self.get_connections_info():
+            if connection_info['connectionId'] == connection_id:
+                return connection_info
+
+        raise OpenViduConnectionDoesNotExistsError()
+
+    def get_connection_count(self) -> int:
+        """
+        Get the number of active connections to the session.
+
+        :return: The number of active connections.
+        """
+        return self.get_info()['connections']['numberOfElements']
+
     @property
     def id(self) -> str:
         """
@@ -160,7 +211,7 @@ class OpenVidu(object):
 
     def get_sessions(self) -> Iterator[OpenViduSession]:
         """
-        Get a list of currently active sessions from the server.
+        Get a list of currently active sessions to the server.
 
         :return: A generator for OpenViduSession objects.
         """
@@ -173,8 +224,7 @@ class OpenVidu(object):
 
     def get_session(self, session_id: str) -> OpenViduSession:
         """
-        Get a currently active session from the server.
-        Returns None if the session does not exists.
+        Get a currently active session to the server.
 
         :return: A OpenViduSession object.
         """

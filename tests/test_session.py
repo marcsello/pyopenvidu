@@ -3,7 +3,7 @@
 """Tests for OpenViduSession object"""
 
 import pytest
-from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError
+from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
 from urllib.parse import urljoin
 
 URL_BASE = 'http://test.openvidu.io:4443/'
@@ -142,3 +142,163 @@ def test_session_info(session_instance, requests_mock):
     a = session_instance.get_info()
 
     assert a == original
+
+
+def test_missing_session_info(session_instance, requests_mock):
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json={}, status_code=404)
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        session_instance.get_info()
+
+
+def test_connections_info(session_instance, requests_mock):
+    original = {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED",
+                "recordingMode": "MANUAL", "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT",
+                "customSessionId": "TestSession", "connections": {"numberOfElements": 2, "content": [
+            {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
+             "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+             "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
+             "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
+                {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                 "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
+                                  "typeOfVideo": "CAMERA", "frameRate": 30,
+                                  "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
+             "subscribers": []}, {"connectionId": "maxawd3ysuj1rxvq", "createdAt": 1538482607659, "location": "",
+                                  "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+                                  "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
+                                  "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
+                                  "subscribers": [
+                                      {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                                       "publisher": "vhdxz7abbfirh2lh"}]}]}, "recording": False}
+
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=original)
+
+    a = session_instance.get_connections_info()
+
+    assert a == original['connections']['content']
+
+
+def test_single_connection_info(session_instance, requests_mock):
+    original = {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED",
+                "recordingMode": "MANUAL", "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT",
+                "customSessionId": "TestSession", "connections": {"numberOfElements": 2, "content": [
+            {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
+             "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+             "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
+             "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
+                {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                 "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
+                                  "typeOfVideo": "CAMERA", "frameRate": 30,
+                                  "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
+             "subscribers": []}, {"connectionId": "maxawd3ysuj1rxvq", "createdAt": 1538482607659, "location": "",
+                                  "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+                                  "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
+                                  "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
+                                  "subscribers": [
+                                      {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                                       "publisher": "vhdxz7abbfirh2lh"}]}]}, "recording": False}
+
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=original)
+
+    a = session_instance.get_connection_info('vhdxz7abbfirh2lh')
+
+    assert a == original['connections']['content'][0]
+
+
+def test_missing_single_connection_info(session_instance, requests_mock):
+    original = {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED",
+                "recordingMode": "MANUAL", "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT",
+                "customSessionId": "TestSession", "connections": {"numberOfElements": 2, "content": [
+            {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
+             "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+             "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
+             "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
+                {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                 "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
+                                  "typeOfVideo": "CAMERA", "frameRate": 30,
+                                  "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
+             "subscribers": []}, {"connectionId": "maxawd3ysuj1rxvq", "createdAt": 1538482607659, "location": "",
+                                  "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+                                  "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
+                                  "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
+                                  "subscribers": [
+                                      {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                                       "publisher": "vhdxz7abbfirh2lh"}]}]}, "recording": False}
+
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=original)
+
+    with pytest.raises(OpenViduConnectionDoesNotExistsError):
+        session_instance.get_connection_info('abc')
+
+
+def test_missing_connections_info(session_instance, requests_mock):
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json={}, status_code=404)
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        session_instance.get_connections_info()
+
+
+def test_connection(session_instance, requests_mock):
+    conn = session_instance.get_connection('vhdxz7abbfirh2lh')  # magic string
+
+    assert conn.id == 'vhdxz7abbfirh2lh'
+
+
+def test_missing_connection(session_instance, requests_mock):
+
+    with pytest.raises(OpenViduConnectionDoesNotExistsError):
+        session_instance.get_connection('abc')
+
+
+def test_connections(session_instance, requests_mock):
+    original = {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED",
+                "recordingMode": "MANUAL", "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT",
+                "customSessionId": "TestSession", "connections": {"numberOfElements": 2, "content": [
+            {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
+             "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+             "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
+             "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
+                {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                 "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
+                                  "typeOfVideo": "CAMERA", "frameRate": 30,
+                                  "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
+             "subscribers": []}, {"connectionId": "maxawd3ysuj1rxvq", "createdAt": 1538482607659, "location": "",
+                                  "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+                                  "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
+                                  "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
+                                  "subscribers": [
+                                      {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                                       "publisher": "vhdxz7abbfirh2lh"}]}]}, "recording": False}
+
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=original)
+
+    conns = list(session_instance.get_connections())
+
+    assert len(conns) == 2
+    assert conns[0].id == 'vhdxz7abbfirh2lh'
+    assert conns[1].id == 'maxawd3ysuj1rxvq'
+
+def test_connections_count(session_instance, requests_mock):
+    original = {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED",
+                "recordingMode": "MANUAL", "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT",
+                "customSessionId": "TestSession", "connections": {"numberOfElements": 2, "content": [
+            {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
+             "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+             "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
+             "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
+                {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                 "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
+                                  "typeOfVideo": "CAMERA", "frameRate": 30,
+                                  "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
+             "subscribers": []}, {"connectionId": "maxawd3ysuj1rxvq", "createdAt": 1538482607659, "location": "",
+                                  "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
+                                  "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
+                                  "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
+                                  "subscribers": [
+                                      {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                                       "publisher": "vhdxz7abbfirh2lh"}]}]}, "recording": False}
+
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=original)
+
+    assert session_instance.get_connection_count() == 2
+
