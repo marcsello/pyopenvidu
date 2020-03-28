@@ -4,8 +4,6 @@
 class OpenViduError(BaseException):
     pass
 
-# Universal error:
-
 
 # Session errors
 

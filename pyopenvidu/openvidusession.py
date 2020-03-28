@@ -23,25 +23,6 @@ class OpenViduSession(object):
         self._session = session
         self._id = session_id
 
-    def is_valid(self) -> bool:
-        """
-        Checks if this session still exists on the server.
-        :return: True if the session exists. False otherwise.
-        """
-        r = self._session.get(f'api/sessions/{self._id}')
-
-        return r.status_code == 200
-
-    def close(self):
-        """
-        Gracefully closes the Session: unpublishes all streams and evicts every participant.
-        Further calls to this object will fail.
-        """
-        r = self._session.delete(f"/api/sessions/{self.id}")
-
-        if r.status_code == 404:
-            raise OpenViduSessionDoesNotExistsError()
-
     def get_info(self) -> dict:
         """
         Get the raw data returned by the server for a session.
@@ -57,6 +38,48 @@ class OpenViduSession(object):
         r.raise_for_status()
 
         return r.json()
+
+    def get_connections_info(self) -> dict:
+        """
+        Get the raw data returned by the server for the clients.
+        This function returns a subset of the get_info() call. This is implemented for consistency.
+
+        https://openvidu.io/docs/reference-docs/REST-API/#get-apisessionsltsession_idgt
+        :return: subset of the exact response from the server as a dict.
+        """
+        return self.get_info()['connections']['content']
+
+    def get_connection_info(self, connection_id: str) -> dict:
+        """
+        Get the raw data returned by the server for the clients.
+        This function returns a subset of the get_info() call. This is implemented for consistency.
+
+        https://openvidu.io/docs/reference-docs/REST-API/#get-apisessionsltsession_idgt
+        :return: subset of the exact response from the server as a dict.
+        """
+        for connection_info in self.get_connections_info():
+            if connection_info['connectionId'] == connection_id:
+                return connection_info
+
+        raise OpenViduConnectionDoesNotExistsError()
+
+    def close(self):
+        """
+        Gracefully closes the Session: unpublishes all streams and evicts every participant.
+        Further calls to this object will fail.
+        """
+        r = self._session.delete(f"/api/sessions/{self.id}")
+
+        if r.status_code == 404:
+            raise OpenViduSessionDoesNotExistsError()
+
+    def is_valid(self) -> bool:
+        """
+        Checks if this session still exists on the server.
+        :return: True if the session exists. False otherwise.
+        """
+        r = self._session.get(f'api/sessions/{self._id}')
+        return r.status_code == 200
 
     def generate_token(self, role: str = 'PUBLISHER', data: str = None, video_max_recv_bandwidth: int = None,
                        video_min_recv_bandwidth: int = None, video_max_send_bandwidth: int = None,
@@ -127,30 +150,6 @@ class OpenViduSession(object):
         """
         self.get_connection_info(connection_id)  # This is used to raise the required exceptions...
         return OpenViduConnection(self._session, self._id, connection_id)
-
-    def get_connections_info(self) -> dict:
-        """
-        Get the raw data returned by the server for the clients.
-        This function returns a subset of the get_info() call. This is implemented for consistency.
-
-        https://openvidu.io/docs/reference-docs/REST-API/#get-apisessionsltsession_idgt
-        :return: subset of the exact response from the server as a dict.
-        """
-        return self.get_info()['connections']['content']
-
-    def get_connection_info(self, connection_id: str) -> dict:
-        """
-        Get the raw data returned by the server for the clients.
-        This function returns a subset of the get_info() call. This is implemented for consistency.
-
-        https://openvidu.io/docs/reference-docs/REST-API/#get-apisessionsltsession_idgt
-        :return: subset of the exact response from the server as a dict.
-        """
-        for connection_info in self.get_connections_info():
-            if connection_info['connectionId'] == connection_id:
-                return connection_info
-
-        raise OpenViduConnectionDoesNotExistsError()
 
     def get_connection_count(self) -> int:
         """

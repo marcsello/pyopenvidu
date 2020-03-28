@@ -34,10 +34,7 @@ class OpenVidu(object):
 
         :return: A generator for OpenViduSession objects.
         """
-        r = self._session.get('api/sessions')
-        r.raise_for_status()
-
-        for session_info in r.json()['content']:
+        for session_info in self.get_sessions_info()['content']:
             session_id = session_info['sessionId']
             yield OpenViduSession(self._session, session_id)
 
@@ -48,13 +45,7 @@ class OpenVidu(object):
         :return: A OpenViduSession object.
         """
         # check for existence
-        r = self._session.get(f'api/sessions/{session_id}')
-
-        if r.status_code == 404:
-            raise OpenViduSessionDoesNotExistsError()
-
-        r.raise_for_status()
-
+        self.get_session_info(session_id)  # This call is used to raise exceptions if the session does not exists
         return OpenViduSession(self._session, session_id)
 
     def get_session_info(self, session_id: str) -> dict:
