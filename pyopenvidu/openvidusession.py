@@ -148,7 +148,8 @@ class OpenViduSession(object):
 
         raise OpenViduConnectionDoesNotExistsError()
 
-    def get_connection_count(self) -> int:
+    @property
+    def connection_count(self) -> int:
         """
         Get the number of active connections to the session.
 

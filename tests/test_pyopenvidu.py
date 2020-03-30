@@ -132,7 +132,7 @@ def test_fetching_changed(openvidu_instance, requests_mock):
 
     session_before_change = openvidu_instance.get_session('TestSession')
 
-    assert session_before_change.get_connection_count() == 2
+    assert session_before_change.connection_count == 2
 
     original = copy(SESSIONS) # Deep copy
     original['content'][0]['connections']['numberOfElements'] = 3
@@ -151,7 +151,7 @@ def test_fetching_changed(openvidu_instance, requests_mock):
 
     openvidu_instance.fetch()
 
-    assert session_before_change.get_connection_count() == 3
+    assert session_before_change.connection_count == 3
 
 
 def test_fetching_new(openvidu_instance, requests_mock):

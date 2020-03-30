@@ -161,7 +161,7 @@ def test_connections(session_instance):
     assert conns[1].id == 'maxawd3ysuj1rxvq'
 
 def test_connections_count(session_instance):
-    assert session_instance.get_connection_count() == 2
+    assert session_instance.connection_count == 2
 
 def test_properties(session_instance):
     assert session_instance.is_being_recorded == SESSIONS['content'][0]['recording']
