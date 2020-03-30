@@ -13,55 +13,38 @@ class OpenViduSession(object):
     A session is a group of users sharing communicating each other.
     """
 
-    def __init__(self, session: BaseUrlSession, session_id: str):
+    def __init__(self, session: BaseUrlSession, data: dict):
         """
         The constructor of this class is intended for internal use. Please use OpenVidu.get_session call to instantiate.
 
         :param session: The requests session object used for communication.
-        :param session_id: The ID of the session this object is going to represent.
+        :param data: The initial internal data stored of the session.
         """
         self._session = session
-        self._id = session_id
+        self._data = data
 
-    def get_info(self) -> dict:
+    def fetch(self):
         """
-        Get the raw data returned by the server for a session.
+        Updates every property of the OpenViduSession with the current status it has in OpenVidu Server. This is especially useful for getting the list of active connections to the OpenViduSession (get_connections()).
+        To update every OpenViduSession object owned by OpenVidu object, call OpenVidu.fetch()
 
-        https://openvidu.io/docs/reference-docs/REST-API/#get-apisessionsltsession_idgt
-        :return: The exact response from the server as a dict.
+        :return: True if the OpenViduSession status has changed with respect to the server, False if not. This applies to any property or sub-property of the object
+
         """
-        r = self._session.get(f'api/sessions/{self._id}')
+        r = self._session.get(f"api/sessions/{self.id}")
 
         if r.status_code == 404:
+            self._data = {}
             raise OpenViduSessionDoesNotExistsError()
 
         r.raise_for_status()
 
-        return r.json()
+        is_changed = self._data != r.json()
 
-    def get_connections_info(self) -> dict:
-        """
-        Get the raw data returned by the server for the clients.
-        This function returns a subset of the get_info() call. This is implemented for consistency.
+        if is_changed:
+            self._data = r.json()
 
-        https://openvidu.io/docs/reference-docs/REST-API/#get-apisessionsltsession_idgt
-        :return: subset of the exact response from the server as a dict.
-        """
-        return self.get_info()['connections']['content']
-
-    def get_connection_info(self, connection_id: str) -> dict:
-        """
-        Get the raw data returned by the server for the clients.
-        This function returns a subset of the get_info() call. This is implemented for consistency.
-
-        https://openvidu.io/docs/reference-docs/REST-API/#get-apisessionsltsession_idgt
-        :return: subset of the exact response from the server as a dict.
-        """
-        for connection_info in self.get_connections_info():
-            if connection_info['connectionId'] == connection_id:
-                return connection_info
-
-        raise OpenViduConnectionDoesNotExistsError()
+        return is_changed
 
     def close(self):
         """
@@ -71,15 +54,16 @@ class OpenViduSession(object):
         r = self._session.delete(f"/api/sessions/{self.id}")
 
         if r.status_code == 404:
+            self._data = {}
             raise OpenViduSessionDoesNotExistsError()
 
     def is_valid(self) -> bool:
         """
-        Checks if this session still exists on the server.
+        Checks if this session still existed on the server by the last call to fetch().
+
         :return: True if the session exists. False otherwise.
         """
-        r = self._session.get(f'api/sessions/{self._id}')
-        return r.status_code == 200
+        return bool(self._data)
 
     def generate_token(self, role: str = 'PUBLISHER', data: str = None, video_max_recv_bandwidth: int = None,
                        video_min_recv_bandwidth: int = None, video_max_send_bandwidth: int = None,
@@ -87,7 +71,7 @@ class OpenViduSession(object):
         """
         Gets a new token associated to Session.
 
-        In the video bandwidth settings 0 means unconstrained. Setting any of them overrides the values configured in for the server
+        In the video bandwidth settings 0 means unconstrained. Setting any of them (other than None) overrides the values configured in for the server.
 
         https://openvidu.io/docs/reference-docs/REST-API/#post-apitokens
         :param role: Allowed values: `SUBSCRIBER`, `PUBLISHER` or `MODERATOR`
@@ -99,12 +83,15 @@ class OpenViduSession(object):
         :param allowed_filters: Array of strings containing the names of the filters the user owning the token will be able to apply.
         :return: The token as String.
         """
+        if not self._data: # Fail early... and always
+            raise OpenViduSessionDoesNotExistsError()
+
         # Prepare parameters
 
         if role not in ['SUBSCRIBER', 'PUBLISHER', 'MODERATOR']:
             raise ValueError(f"Role must be any of SUBSCRIBER, PUBLISHER or MODERATOR, not {role}")
 
-        parameters = {"session": self._id, "role": role}
+        parameters = {"session": self.id, "role": role}
 
         if data:
             parameters['data'] = data
@@ -138,8 +125,11 @@ class OpenViduSession(object):
 
         :return: A generator for OpenViduConnection objects.
         """
-        for connection_info in self.get_connections_info():
-            yield OpenViduConnection(self._session, self._id, connection_info['connectionId'])
+        if not self._data:
+            raise OpenViduSessionDoesNotExistsError()
+
+        for connection_info in self._data['connections']['content']:
+            yield OpenViduConnection(self._session, self.id, connection_info)
 
     def get_connection(self, connection_id: str) -> OpenViduConnection:
         """
@@ -148,8 +138,14 @@ class OpenViduSession(object):
         :param connection_id: Connection id.
         :return: A OpenViduConnection objects.
         """
-        self.get_connection_info(connection_id)  # This is used to raise the required exceptions...
-        return OpenViduConnection(self._session, self._id, connection_id)
+        if not self._data:
+            raise OpenViduSessionDoesNotExistsError()
+
+        for connection_info in self._data['connections']['content']:
+            if connection_info['connectionId'] == connection_id:
+                return OpenViduConnection(self._session, self.id, connection_info)
+
+        raise OpenViduConnectionDoesNotExistsError()
 
     def get_connection_count(self) -> int:
         """
@@ -157,7 +153,10 @@ class OpenViduSession(object):
 
         :return: The number of active connections.
         """
-        return self.get_info()['connections']['numberOfElements']
+        if not self._data:
+            raise OpenViduSessionDoesNotExistsError()
+
+        return self._data['connections']['numberOfElements']
 
     @property
     def id(self) -> str:
@@ -165,4 +164,7 @@ class OpenViduSession(object):
 
         :return: The ID of this session.
         """
-        return self._id
+        if not self._data:
+            raise OpenViduSessionDoesNotExistsError()
+
+        return self._data['sessionId']
