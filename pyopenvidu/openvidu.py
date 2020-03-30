@@ -40,31 +40,31 @@ class OpenVidu(object):
         r = self._session.get("api/sessions")
         r.raise_for_status()
 
-        current_data = [s._data for s in self._openvidu_sessions]
+        current_data = [s._data for s in self._openvidu_sessions.values()]
         new_data = r.json()['content']
 
         is_changed = current_data != new_data
 
         if is_changed:
             # update, create valid streams
-            valid_streams = []
-            for stream_data in new_data:
-                stream_id = stream_data['streamId']
-                valid_streams.append(stream_id)
+            valid_sessions = []
+            for session_data in new_data:
+                session_id = session_data['sessionId']
+                valid_sessions.append(session_id)
 
-                if stream_id in self._openvidu_sessions.keys():
-                    self._openvidu_sessions[
-                        stream_id].data = stream_data  # Update is important, because the reference must be the same
+                if session_id in self._openvidu_sessions.keys():
+                    # Update is important, because the reference must be the same
+                    self._openvidu_sessions[session_id]._data = session_data
                 else:
-                    self._openvidu_sessions[stream_id].data = OpenViduSession(self._session, stream_data)
+                    self._openvidu_sessions[session_id] = OpenViduSession(self._session, session_data)
 
             # reset data of invalid streams
-            for stream_id, stream in self._openvidu_sessions:
-                if stream_id not in valid_streams:
-                    stream._data = {}
+            for session_id, session in self._openvidu_sessions.items():
+                if session_id not in valid_sessions:
+                    session._data = {}
 
-            # remove invalid streams from list
-            self._openvidu_sessions = {k: v for k, v in self._openvidu_sessions.items() if k in valid_streams}
+            # remove invalid sessions from list
+            self._openvidu_sessions = {k: v for k, v in self._openvidu_sessions.items() if k in valid_sessions}
 
         return is_changed
 
@@ -87,6 +87,7 @@ class OpenVidu(object):
             raise OpenViduSessionDoesNotExistsError()
 
         return self._openvidu_sessions[session_id]
+
 
     def get_session_count(self) -> int:
         """
