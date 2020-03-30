@@ -31,8 +31,16 @@ class OpenViduConnection(object):
 
     @property
     def id(self) -> str:
+        """
+
+        :return: The ID of the connection this object represents.
+        """
         return self._data['connectionId']
 
     @property
     def session_id(self) -> str:
+        """
+
+        :return: The ID of the session this Connection lives in.
+        """
         return self._session_id

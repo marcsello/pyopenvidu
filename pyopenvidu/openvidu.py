@@ -80,15 +80,19 @@ class OpenVidu(object):
         """
         Get a currently active session to the server.
 
-        :return: A OpenViduSession object.
+        :param session_id: The ID of the session to acquire.
+        :return: An OpenViduSession object.
         """
+        if session_id not in self._openvidu_sessions:
+            raise OpenViduSessionDoesNotExistsError()
+
         return self._openvidu_sessions[session_id]
 
     def get_session_count(self) -> int:
         """
         Get the number of active sessions on the server.
 
-        :return: The number of active sessions
+        :return: The number of active sessions.
         """
         return len(self._openvidu_sessions)
 

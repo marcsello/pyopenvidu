@@ -18,7 +18,7 @@ class OpenViduSession(object):
         The constructor of this class is intended for internal use. Please use OpenVidu.get_session call to instantiate.
 
         :param session: The requests session object used for communication.
-        :param data: The initial internal data stored of the session
+        :param data: The initial internal data stored of the session.
         """
         self._session = session
         self._data = data
@@ -71,7 +71,7 @@ class OpenViduSession(object):
         """
         Gets a new token associated to Session.
 
-        In the video bandwidth settings 0 means unconstrained. Setting any of them overrides the values configured in for the server
+        In the video bandwidth settings 0 means unconstrained. Setting any of them (other than None) overrides the values configured in for the server.
 
         https://openvidu.io/docs/reference-docs/REST-API/#post-apitokens
         :param role: Allowed values: `SUBSCRIBER`, `PUBLISHER` or `MODERATOR`
