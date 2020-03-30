@@ -28,7 +28,6 @@ class OpenVidu(object):
             'User-Agent': user_agent('PyOpenVidu', __version__)
         })
 
-        self._data = {}
         self._openvidu_sessions = {}  # id:object
         self.fetch()  # initial fetch
 
@@ -41,13 +40,15 @@ class OpenVidu(object):
         r = self._session.get("api/sessions")
         r.raise_for_status()
 
-        is_changed = r.json() != self._data
-        self._data = r.json()
+        current_data = [s._data for s in self._openvidu_sessions]
+        new_data = r.json()['content']
+
+        is_changed = current_data != new_data
 
         if is_changed:
             # update, create valid streams
             valid_streams = []
-            for stream_data in self._data['content']:
+            for stream_data in new_data:
                 stream_id = stream_data['streamId']
                 valid_streams.append(stream_id)
 
@@ -73,7 +74,7 @@ class OpenVidu(object):
 
         :return: A list of OpenViduSession objects.
         """
-        return self._openvidu_sessions.values()
+        return list(self._openvidu_sessions.values())
 
     def get_session(self, session_id: str) -> OpenViduSession:
         """
@@ -89,7 +90,7 @@ class OpenVidu(object):
 
         :return: The number of active sessions
         """
-        return self._data['numberOfElements']
+        return len(self._openvidu_sessions)
 
     def get_config(self) -> dict:
         """
