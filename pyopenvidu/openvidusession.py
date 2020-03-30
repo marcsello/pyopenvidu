@@ -57,6 +57,7 @@ class OpenViduSession(object):
             self._data = {}
             raise OpenViduSessionDoesNotExistsError()
 
+    @property
     def is_valid(self) -> bool:
         """
         Checks if this session still existed on the server by the last call to fetch().
