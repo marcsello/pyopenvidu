@@ -9,4 +9,4 @@ from .openvidusession import OpenViduSession
 from .openviduconnection import OpenViduConnection
 
 from .exceptions import OpenViduError, OpenViduSessionError, OpenViduSessionDoesNotExistsError, OpenViduConnectionError, \
-    OpenViduConnectionDoesNotExistsError
+    OpenViduConnectionDoesNotExistsError, OpenViduStreamError, OpenViduStreamDoesNotExistsError

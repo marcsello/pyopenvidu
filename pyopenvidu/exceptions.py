@@ -17,9 +17,19 @@ class OpenViduSessionDoesNotExistsError(OpenViduSessionError):
 
 # Connection errors
 
-class OpenViduConnectionError(OpenViduError):
+class OpenViduConnectionError(OpenViduSessionError):
     pass
 
 
 class OpenViduConnectionDoesNotExistsError(OpenViduConnectionError):
+    pass
+
+
+# Stream errors
+
+class OpenViduStreamError(OpenViduConnectionError):
+    pass
+
+
+class OpenViduStreamDoesNotExistsError(OpenViduStreamError):
     pass
