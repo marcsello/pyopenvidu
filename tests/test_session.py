@@ -3,6 +3,7 @@
 """Tests for OpenViduSession object"""
 
 import pytest
+from datetime import datetime
 from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
 from urllib.parse import urljoin
 
@@ -146,7 +147,7 @@ def test_connection(session_instance, requests_mock):
     assert conn.id == 'vhdxz7abbfirh2lh'
 
 
-def test_missing_connection(session_instance, requests_mock):
+def test_missing_connection(session_instance):
 
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         session_instance.get_connection('abc')
@@ -160,6 +161,9 @@ def test_connections(session_instance):
     assert conns[1].id == 'maxawd3ysuj1rxvq'
 
 def test_connections_count(session_instance):
-
     assert session_instance.get_connection_count() == 2
 
+def test_properties(session_instance):
+    assert session_instance.is_being_recorded == SESSIONS['content'][0]['recording']
+    assert session_instance.media_mode == SESSIONS['content'][0]['mediaMode']
+    assert session_instance.created_at == datetime.utcfromtimestamp(SESSIONS['content'][0]['createdAt']/1000.0)

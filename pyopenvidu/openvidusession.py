@@ -1,6 +1,6 @@
 """OpenViduSession class."""
 from typing import Iterator
-
+from datetime import datetime
 from requests_toolbelt.sessions import BaseUrlSession
 
 from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
@@ -161,10 +161,30 @@ class OpenViduSession(object):
     @property
     def id(self) -> str:
         """
-
         :return: The ID of this session.
         """
         if not self._data:
             raise OpenViduSessionDoesNotExistsError()
 
         return self._data['sessionId']
+
+    @property
+    def created_at(self) -> datetime:
+        """
+        :return: datetime object when the session was created in UTC time.
+        """
+        return datetime.utcfromtimestamp(self._data['createdAt'] / 1000.0)
+
+    @property
+    def is_being_recorded(self) -> bool:
+        """
+        :return: True if the session is being recorded. False otherwise.
+        """
+        return self._data['recording']
+
+    @property
+    def media_mode(self) -> str:
+        """
+        :return: Media mode configured for the session ('ROUTED' or 'RELAYED').
+        """
+        return self._data['mediaMode']
