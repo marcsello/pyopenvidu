@@ -88,8 +88,8 @@ class OpenVidu(object):
 
         return self._openvidu_sessions[session_id]
 
-
-    def get_session_count(self) -> int:
+    @property
+    def session_count(self) -> int:
         """
         Get the number of active sessions on the server.
 

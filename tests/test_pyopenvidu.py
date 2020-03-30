@@ -84,7 +84,7 @@ def test_sessions(openvidu_instance):
 
 def test_session_count(openvidu_instance):
 
-    assert openvidu_instance.get_session_count() == 2
+    assert openvidu_instance.session_count == 2
 
 
 def test_no_sessions(openvidu_instance, requests_mock):
@@ -104,7 +104,7 @@ def test_no_sessions_session_count(openvidu_instance, requests_mock):
     requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
 
     openvidu_instance.fetch()
-    assert openvidu_instance.get_session_count() == 0
+    assert openvidu_instance.session_count == 0
 
 
 def test_session_missing_session(openvidu_instance, requests_mock):
