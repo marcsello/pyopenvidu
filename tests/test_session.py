@@ -119,11 +119,11 @@ def test_session_is_valid_no(session_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.fetch()
 
-    assert session_instance.is_valid() == False
+    assert session_instance.is_valid == False
 
 
 def test_session_is_valid_yes(session_instance):
-    assert session_instance.is_valid() == True
+    assert session_instance.is_valid == True
 
 
 def test_session_close(session_instance, requests_mock):
