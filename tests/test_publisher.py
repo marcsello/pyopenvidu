@@ -6,6 +6,7 @@ import pytest
 from pyopenvidu import OpenVidu, OpenViduStreamDoesNotExistsError, OpenViduSessionDoesNotExistsError, \
     OpenViduStreamError
 from urllib.parse import urljoin
+from datetime import datetime
 
 URL_BASE = 'http://test.openvidu.io:4443/'
 SESSIONS = {"numberOfElements": 2, "content": [
@@ -111,4 +112,13 @@ def test_unpublish_ipcam(connection_instance, requests_mock):
 
 
 def test_properties(connection_instance):
-    pass
+    p = connection_instance.publishers[0]
+
+    assert p.session_id == SESSIONS['content'][0]['sessionId']
+    assert p.stream_id == SESSIONS['content'][0]['connections']['content'][0]['publishers'][0]['streamId']
+
+    assert p.created_at == datetime.utcfromtimestamp(
+        SESSIONS['content'][0]['connections']['content'][0]['publishers'][0]['createdAt'] / 1000.0
+    )
+
+    assert p.media_options == SESSIONS['content'][0]['connections']['content'][0]['publishers'][0]['mediaOptions']

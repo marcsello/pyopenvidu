@@ -17,7 +17,7 @@ class OpenViduPublisher(object):
         self._session = session
         self.session_id = session_id
         self.stream_id = data['streamId']
-        self.created_at = datetime.fromtimestamp(data['createdAt'] / 1000.0)
+        self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)
         self.media_options = data['mediaOptions']
 
     def force_unpublish(self):
