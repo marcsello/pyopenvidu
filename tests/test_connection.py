@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Tests for OpenViduSession object"""
+"""Tests for OpenViduConnection object"""
 
 import pytest
 from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
