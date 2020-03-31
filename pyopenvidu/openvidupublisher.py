@@ -2,7 +2,7 @@
 from requests_toolbelt.sessions import BaseUrlSession
 from dataclasses import dataclass
 from datetime import datetime
-from exceptions import OpenViduSessionDoesNotExistsError, OpenViduStreamDoesNotExistsError, OpenViduStreamError
+from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduStreamDoesNotExistsError, OpenViduStreamError
 
 
 # Notice: Frozen should be changed to True in later versions of Python3 where a nice method for custom initializer is implemented
