@@ -185,6 +185,8 @@ class OpenViduSession(object):
         elif r.status_code == 406:
             raise OpenViduConnectionDoesNotExistsError()
 
+        r.raise_for_status()
+
     @property
     def connection_count(self) -> int:
         """
