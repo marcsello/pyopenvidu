@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from .exceptions import OpenViduConnectionDoesNotExistsError, OpenViduSessionDoesNotExistsError
 from datetime import datetime
 from .openvidupublisher import OpenViduPublisher
+from .openvidusubscriber import OpenViduSubscriber
 
 
 # Notice: Frozen should be changed to True in later versions of Python3 where a nice method for custom initializer is implemented
@@ -18,6 +19,7 @@ class OpenViduConnection(object):
     session_id: str
     created_at: datetime
     publishers: List[OpenViduPublisher]
+    subscribers: List[OpenViduSubscriber]
     platform: str
     token: str
     role: str
@@ -42,7 +44,14 @@ class OpenViduConnection(object):
         for publisher_data in data['publishers']:
             publishers.append(OpenViduPublisher(session, session_id, publisher_data))
 
+        # set subscribers
+        subscribers = []
+        for subscriber_data in data['subscribers']:
+            subscribers.append(OpenViduSubscriber(session, session_id, subscriber_data))
+
+
         self.publishers = publishers
+        self.subscribers = subscribers
 
     def force_disconnect(self):
         """
