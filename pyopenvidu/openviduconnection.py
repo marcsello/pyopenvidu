@@ -49,7 +49,6 @@ class OpenViduConnection(object):
         for subscriber_data in data['subscribers']:
             subscribers.append(OpenViduSubscriber(session, session_id, subscriber_data))
 
-
         self.publishers = publishers
         self.subscribers = subscribers
 
@@ -64,5 +63,36 @@ class OpenViduConnection(object):
             raise OpenViduConnectionDoesNotExistsError()
         if r.status_code == 400:
             raise OpenViduSessionDoesNotExistsError()
+
+        r.raise_for_status()
+
+    def signal(self, type_: str = None, data: str = None):
+        """
+        Sends a signal to this connection.
+
+        https://openvidu.io/docs/reference-docs/REST-API/#post-apisignal
+        :param type_: Type of the signal. In the body example of the table above, only users subscribed to Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal') will trigger signals of any type.
+        :param data: Actual data of the signal.
+        :param to: List of OpenViduConnection objects to which you want to send the signal. If this property is not set (None) the signal will be sent to all participants of the session.
+        """
+
+        parameters = {
+            "session": self.session_id,
+            "to": [self.id],
+            "type": type_,
+            "data": data
+        }
+
+        parameters = {k: v for k, v in parameters.items() if v is not None}
+
+        # send request
+        r = self._session.post('api/signal', json=parameters)
+
+        if r.status_code == 404:
+            raise OpenViduSessionDoesNotExistsError()
+        elif r.status_code == 400:
+            raise ValueError()
+        elif r.status_code == 406:
+            raise OpenViduConnectionDoesNotExistsError()
 
         r.raise_for_status()
