@@ -1,5 +1,5 @@
 """OpenViduSession class."""
-from typing import Iterator
+from typing import Iterator, List
 from datetime import datetime
 from requests_toolbelt.sessions import BaseUrlSession
 
@@ -84,7 +84,7 @@ class OpenViduSession(object):
         :param allowed_filters: Array of strings containing the names of the filters the user owning the token will be able to apply.
         :return: The token as String.
         """
-        if not self._data: # Fail early... and always
+        if not self._data:  # Fail early... and always
             raise OpenViduSessionDoesNotExistsError()
 
         # Prepare parameters
@@ -147,6 +147,43 @@ class OpenViduSession(object):
                 return OpenViduConnection(self._session, self.id, connection_info)
 
         raise OpenViduConnectionDoesNotExistsError()
+
+    def signal(self, type_: str = None, data: str = None, to: List[OpenViduConnection] = None):
+        """
+        Sends a signal to all participants in the session or specific connections if the `to` property defined.
+        OpenViduConnection objects also implement this method.
+
+        https://openvidu.io/docs/reference-docs/REST-API/#post-apisignal
+        :param type_: Type of the signal. In the body example of the table above, only users subscribed to Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal') will trigger signals of any type.
+        :param data: Actual data of the signal.
+        :param to: List of OpenViduConnection objects to which you want to send the signal. If this property is not set (None) the signal will be sent to all participants of the session.
+        """
+        if not self._data:  # Fail early... and always
+            raise OpenViduSessionDoesNotExistsError()
+
+        if to:
+            recipient_list = [connection.id for connection in to]
+        else:
+            recipient_list = None
+
+        parameters = {
+            "session": self.id,
+            "to": recipient_list,
+            "type": type_,
+            "data": data
+        }
+
+        parameters = {k: v for k, v in parameters.items() if v is not None}
+
+        # send request
+        r = self._session.post('api/signal', json=parameters)
+
+        if r.status_code == 404:
+            raise OpenViduSessionDoesNotExistsError()
+        elif r.status_code == 400:
+            raise ValueError()
+        elif r.status_code == 406:
+            raise OpenViduConnectionDoesNotExistsError()
 
     @property
     def connection_count(self) -> int:
