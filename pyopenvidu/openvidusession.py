@@ -120,7 +120,8 @@ class OpenViduSession(object):
 
         return r.json()['token']
 
-    def get_connections(self) -> Iterator[OpenViduConnection]:
+    @property
+    def connections(self) -> Iterator[OpenViduConnection]:
         """
         Returns the list of active connections to the session.
 

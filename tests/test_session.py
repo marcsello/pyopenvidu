@@ -153,7 +153,7 @@ def test_missing_connection(session_instance):
 
 
 def test_connections(session_instance):
-    conns = list(session_instance.get_connections())
+    conns = list(session_instance.connections)
 
     assert len(conns) == 2
     assert conns[0].id == 'vhdxz7abbfirh2lh'
@@ -188,7 +188,7 @@ def test_signal_basic(session_instance, requests_mock):
 
 def test_signal_extra(session_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'api/signal'), status_code=200)
-    connections = list(session_instance.get_connections())
+    connections = list(session_instance.connections)
 
     session_instance.signal('MY_TYPE', "Hello world!", connections)
 
