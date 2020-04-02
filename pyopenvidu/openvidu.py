@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 from requests_toolbelt import user_agent
 
 from . import __version__
-from .exceptions import OpenViduSessionDoesNotExistsError
+from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduSessionExistsError
 from .openvidusession import OpenViduSession
 
 
@@ -87,6 +87,37 @@ class OpenVidu(object):
             raise OpenViduSessionDoesNotExistsError()
 
         return self._openvidu_sessions[session_id]
+
+    def create_session(self, custom_session_id: str = None, media_mode: str = None) -> OpenViduSession:
+        """
+        Creates a new OpenVidu session.
+
+        This method calls fetch() automatically since the server does not return the proper data to construct the OpenViduSession object.
+
+        https://openvidu.io/docs/reference-docs/REST-API/#post-apisessions
+        :param custom_session_id: You can fix the sessionId that will be assigned to the session with this parameter.
+        :param media_mode: ROUTED (default) or RELAYED
+        :return: The created OpenViduSession instance.
+        """
+        # Prepare parameters
+        if media_mode not in ['ROUTED', 'RELAYED', None]:
+            raise ValueError(f"media_mode must be any of ROUTED or RELAYED, not {media_mode}")
+
+        parameters = {"mediaMode": media_mode, "customSessionId": custom_session_id}
+        parameters = {k: v for k, v in parameters.items() if v is not None}
+
+        # send request
+        r = self._session.post('api/sessions', json=parameters)
+
+        if r.status_code == 409:
+            raise OpenViduSessionExistsError()
+        elif r.status_code == 400:
+            raise ValueError()
+
+        r.raise_for_status()
+
+        self.fetch()  # because the POST does not return the proper data object...
+        return self.get_session(r.json()['id'])
 
     @property
     def session_count(self) -> int:
