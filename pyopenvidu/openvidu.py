@@ -68,14 +68,6 @@ class OpenVidu(object):
 
         return is_changed
 
-    def get_sessions(self) -> List[OpenViduSession]:
-        """
-        Get a list of currently active sessions to the server.
-
-        :return: A list of OpenViduSession objects.
-        """
-        return list(self._openvidu_sessions.values())
-
     def get_session(self, session_id: str) -> OpenViduSession:
         """
         Get a currently active session to the server.
@@ -118,6 +110,15 @@ class OpenVidu(object):
 
         self.fetch()  # because the POST does not return the proper data object...
         return self.get_session(r.json()['id'])
+
+    @property
+    def sessions(self) -> List[OpenViduSession]:
+        """
+        Get a list of currently active sessions to the server.
+
+        :return: A list of OpenViduSession objects.
+        """
+        return list(self._openvidu_sessions.values())
 
     @property
     def session_count(self) -> int:

@@ -75,7 +75,7 @@ def test_config(openvidu_instance, requests_mock):
 
 
 def test_sessions(openvidu_instance):
-    sessions = openvidu_instance.get_sessions()
+    sessions = openvidu_instance.sessions
 
     assert len(sessions) == 2
     assert sessions[0].id == "TestSession"
@@ -173,7 +173,7 @@ def test_no_sessions(openvidu_instance, requests_mock):
     requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
 
     openvidu_instance.fetch()
-    sessions = openvidu_instance.get_sessions()
+    sessions = openvidu_instance.sessions
 
     assert len(sessions) == 0
 
