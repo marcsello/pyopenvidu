@@ -24,7 +24,7 @@ class OpenViduPublisher(object):
         """
         Forces some user to unpublish a Stream. OpenVidu Browser will trigger the proper events on the client-side (streamDestroyed) with reason set to "forceUnpublishByServer".
         After this call, the instace of the object, and the parent OpenViduConnection instance should be considered invalid.
-        Remember to call fetch() before to fetch the current actual properties of the Session from OpenVidu Server
+        Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
 
         https://openvidu.io/docs/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
         """

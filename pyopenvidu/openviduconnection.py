@@ -55,6 +55,7 @@ class OpenViduConnection(object):
     def force_disconnect(self):
         """
         Forces the user represented by connection to leave the session.
+        Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
 
         https://openvidu.io/docs/reference-docs/REST-API/#delete-apisessionsltsession_idgtconnectionltconnection_idgt
         """
@@ -101,7 +102,7 @@ class OpenViduConnection(object):
         """
         Forces the user to unpublish all of their Stream. OpenVidu Browser will trigger the proper events on the client-side (streamDestroyed) with reason set to "forceUnpublishByServer".
         After this call, the instace of the object, should be considered invalid.
-        Remember to call fetch() before to fetch the current actual properties of the Session from OpenVidu Server!
+        Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
 
         https://openvidu.io/docs/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
         """
