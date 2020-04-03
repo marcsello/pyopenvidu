@@ -78,7 +78,12 @@ class OpenVidu(object):
         if session_id not in self._openvidu_sessions:
             raise OpenViduSessionDoesNotExistsError()
 
-        return self._openvidu_sessions[session_id]
+        session = self._openvidu_sessions[session_id]
+
+        if not session.is_valid:
+            raise OpenViduSessionDoesNotExistsError()
+
+        return session
 
     def create_session(self, custom_session_id: str = None, media_mode: str = None) -> OpenViduSession:
         """
@@ -118,7 +123,7 @@ class OpenVidu(object):
 
         :return: A list of OpenViduSession objects.
         """
-        return list(self._openvidu_sessions.values())
+        return [sess for sess in self._openvidu_sessions.values() if sess.is_valid] # yeah... the fetch() hell just begun
 
     @property
     def session_count(self) -> int:
@@ -127,7 +132,7 @@ class OpenVidu(object):
 
         :return: The number of active sessions.
         """
-        return len(self._openvidu_sessions)
+        return len(self.sessions)
 
     def get_config(self) -> dict:
         """

@@ -205,6 +205,28 @@ def test_fetching_deleted(openvidu_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_before_delete.fetch()
 
+def test_access_after_close_without_fetch(openvidu_instance, requests_mock):
+    session_to_close = openvidu_instance.get_session('TestSession')
+    a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession'), status_code=204)
+
+    session_to_close.close()
+
+    assert a.called == True
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        openvidu_instance.get_session('TestSession')
+
+def test_inlist_after_close_without_fetch(openvidu_instance, requests_mock):
+    session_to_close = openvidu_instance.get_session('TestSession')
+    a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession'), status_code=204)
+
+    session_to_close.close()
+
+    assert a.called == True
+
+    assert len(openvidu_instance.sessions) == 1
+    assert openvidu_instance.session_count == 1
+
 
 def test_fetching_changed(openvidu_instance, requests_mock):
     session_before_change = openvidu_instance.get_session('TestSession')
