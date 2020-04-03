@@ -57,6 +57,9 @@ class OpenViduSession(object):
             self._data = {}
             raise OpenViduSessionDoesNotExistsError()
 
+        r.raise_for_status()
+        self._data = {}
+
     @property
     def is_valid(self) -> bool:
         """
