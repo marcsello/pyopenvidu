@@ -41,6 +41,11 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/marcsello/pyopenvidu',
+    project_urls={
+        "Documentation": "https://pyopenvidu.readthedocs.io/",
+        "Code": "https://github.com/marcsello/pyopenvidu",
+        "Issue tracker": "https://github.com/marcsello/pyopenvidu/issues",
+    },
     version='0.1.0',
     zip_safe=False,
 )
