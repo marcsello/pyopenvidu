@@ -132,6 +132,7 @@ def test_session_close(session_instance, requests_mock):
     session_instance.close()
 
     assert adapter.called
+    assert session_instance.is_valid == False
 
 
 def test_session_close_missing(session_instance, requests_mock):
@@ -140,6 +141,7 @@ def test_session_close_missing(session_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.close()
 
+    assert session_instance.is_valid == False
 
 def test_connection(session_instance, requests_mock):
     conn = session_instance.get_connection('vhdxz7abbfirh2lh')  # magic string
