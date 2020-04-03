@@ -2,7 +2,7 @@
 About fetching...
 =================
 
-In PyOpenVidu there are two kind of objects: dynamic and static. This sections aim to explain the details about this design.
+In PyOpenVidu there are two kind of objects: dynamic and static. This section aim to explain the details about this design.
 
 Dynamic and static objects
 --------------------------
@@ -22,7 +22,7 @@ Sometimes those objects have such a function that updates the internal represent
 
    * - **OpenVidu**
      - `__init__(...)`
-     - Upon instantiating this object makes an initial call to `self.fetch()` to collect initial data.
+     - Upon instantiating this object makes a call to `self.fetch()` to collect initial data.
 
    * - **OpenVidu**
      - `fetch()`
