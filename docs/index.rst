@@ -9,7 +9,7 @@ Welcome to PyOpenVidu's documentation!
    installation
    examples
    fetching
-   modules
+   source/modules
    contributing
    authors
    history
