@@ -6,4 +6,4 @@ History
 ------------------
 
 * First release on PyPI.
-* Implemented support for most of the endpoints except recording stuff
+* Implemented support for most of the endpoints except recording and IPCam stuff

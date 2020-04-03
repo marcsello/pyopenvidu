@@ -7,7 +7,8 @@ Welcome to PyOpenVidu's documentation!
 
    readme
    installation
-   usage
+   examples
+   fetching
    modules
    contributing
    authors
