@@ -11,16 +11,12 @@ install: pip install -U tox-travis
 # Command to run tests, e.g. python setup.py test
 script: tox
 
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
+# Deploy to PyPI
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
-  user: marcsello
-  password:
-    secure: PLEASE_REPLACE_ME
+  user: "__token__"
+  password: $PYPI_TOKEN
   on:
     tags: true
     repo: marcsello/pyopenvidu
