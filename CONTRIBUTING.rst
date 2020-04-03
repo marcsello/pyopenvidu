@@ -66,13 +66,14 @@ Ready to contribute? Here's how to set up `pyopenvidu` for local development.
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
-    $ mkvirtualenv pyopenvidu
+    $ python3 -m venv venv
     $ cd pyopenvidu/
     $ python setup.py develop
 
-4. Create a branch for local development::
+4. Create a branch for local development (sould be branched from `dev`. Prefix it with `dev-`)::
 
-    $ git checkout -b name-of-your-bugfix-or-feature
+    $ git checkout dev
+    $ git checkout -b dev-name-of-your-bugfix-or-feature
 
    Now you can make your changes locally.
 
@@ -80,7 +81,7 @@ Ready to contribute? Here's how to set up `pyopenvidu` for local development.
    tests, including testing other Python versions with tox::
 
     $ flake8 pyopenvidu tests
-    $ python setup.py test or pytest
+    $ python3 setup.py pytest
     $ tox
 
    To get flake8 and tox, just pip install them into your virtualenv.
@@ -89,7 +90,7 @@ Ready to contribute? Here's how to set up `pyopenvidu` for local development.
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
+    $ git push origin dev-name-of-your-bugfix-or-feature
 
 7. Submit a pull request through the GitHub website.
 
@@ -102,7 +103,7 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.5, 3.6, 3.7 and 3.8, and for PyPy. Check
+3. The pull request should work for Python 3.7 and 3.8, and for PyPy. Check
    https://travis-ci.com/marcsello/pyopenvidu/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
@@ -111,7 +112,7 @@ Tips
 
 To run a subset of tests::
 
-$ pytest tests.test_pyopenvidu
+    $ pytest tests.test_pyopenvidu
 
 
 Deploying
@@ -121,8 +122,8 @@ A reminder for the maintainers on how to deploy.
 Make sure all your changes are committed (including an entry in HISTORY.rst).
 Then run::
 
-$ bump2version patch # possible: major / minor / patch
-$ git push
-$ git push --tags
+    $ bump2version patch # possible: major / minor / patch
+    $ git push
+    $ git push --tags
 
 Travis will then deploy to PyPI if tests pass.

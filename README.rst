@@ -26,10 +26,15 @@ Python interface to the OpenVidu WebRTC videoconverence library.
 Features
 --------
 
-* TODO
+* Use OpenVidu API objects as native Python objects
+* Supports Python 3.7 and above
+* Depends on nothing more than `requests` and `requests-toolbelt`
 
 Credits
 -------
+
+This implementation is inspired by the original Java implementation by the OpenVidu team.
+https://openvidu.io/docs/reference-docs/openvidu-java-client/
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
