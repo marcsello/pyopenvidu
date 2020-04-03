@@ -126,3 +126,13 @@ def test_signal_no_connection(connection_instance, requests_mock):
 
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         connection_instance.signal('MY_TYPE', "Hello world!")
+
+
+def test_force_unpublish_all(connection_instance, requests_mock):
+    a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
+                             json={},
+                             status_code=204)
+
+    connection_instance.force_unpublish_all_streams()
+
+    assert a.called

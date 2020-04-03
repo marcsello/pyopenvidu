@@ -96,3 +96,14 @@ class OpenViduConnection(object):
             raise OpenViduConnectionDoesNotExistsError()
 
         r.raise_for_status()
+
+    def force_unpublish_all_streams(self):
+        """
+        Forces the user to unpublish all of their Stream. OpenVidu Browser will trigger the proper events on the client-side (streamDestroyed) with reason set to "forceUnpublishByServer".
+        After this call, the instace of the object, should be considered invalid.
+        Remember to call fetch() before to fetch the current actual properties of the Session from OpenVidu Server!
+
+        https://openvidu.io/docs/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
+        """
+        for publisher in self.publishers:
+            publisher.force_unpublish()
