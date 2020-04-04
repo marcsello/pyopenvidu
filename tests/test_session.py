@@ -62,9 +62,9 @@ def session_instance(openvidu_instance):
     yield openvidu_instance.get_session('TestSession')
 
 
-def test_session_id(session_instance):
-    assert session_instance.id == 'TestSession'
-
+#
+# Token generation
+#
 
 def test_session_token(session_instance, requests_mock):
     token_response = {
@@ -101,7 +101,7 @@ def test_session_token_extra(session_instance, requests_mock):
     }
 
 
-def test_session_token_value_error(session_instance):
+def test_session_token_validation_error(session_instance):
     with pytest.raises(ValueError):
         session_instance.generate_token(role='abc')
 
@@ -113,17 +113,9 @@ def test_session_token_missing_session(session_instance, requests_mock):
         session_instance.generate_token()
 
 
-def test_session_is_valid_no(session_instance, requests_mock):
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json={}, status_code=404)
-
-    with pytest.raises(OpenViduSessionDoesNotExistsError):
-        session_instance.fetch()
-
-    assert session_instance.is_valid == False
-
-
-def test_session_is_valid_yes(session_instance):
-    assert session_instance.is_valid == True
+#
+# Closing
+#
 
 
 def test_session_close(session_instance, requests_mock):
@@ -143,7 +135,12 @@ def test_session_close_missing(session_instance, requests_mock):
 
     assert session_instance.is_valid == False
 
-def test_connection(session_instance, requests_mock):
+
+#
+# Connections
+#
+
+def test_connection(session_instance):
     conn = session_instance.get_connection('vhdxz7abbfirh2lh')  # magic string
 
     assert conn.id == 'vhdxz7abbfirh2lh'
@@ -166,14 +163,8 @@ def test_connections_count(session_instance):
     assert session_instance.connection_count == 2
 
 
-def test_properties(session_instance):
-    assert session_instance.is_being_recorded == SESSIONS['content'][0]['recording']
-    assert session_instance.media_mode == SESSIONS['content'][0]['mediaMode']
-    assert session_instance.created_at == datetime.utcfromtimestamp(SESSIONS['content'][0]['createdAt'] / 1000.0)
-
-
 #
-# Signal Tests
+# Signals
 #
 
 def test_signal_basic(session_instance, requests_mock):
@@ -238,3 +229,30 @@ def test_signal_no_connection(session_instance, requests_mock):
 
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
+
+
+#
+# Properties
+#
+
+def test_session_id(session_instance):
+    assert session_instance.id == 'TestSession'
+
+
+def test_session_became_invalid(session_instance, requests_mock):
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json={}, status_code=404)
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        session_instance.fetch()
+
+    assert session_instance.is_valid == False
+
+
+def test_session_is_valid_true(session_instance):
+    assert session_instance.is_valid == True
+
+
+def test_other_properties(session_instance):
+    assert session_instance.is_being_recorded == SESSIONS['content'][0]['recording']
+    assert session_instance.media_mode == SESSIONS['content'][0]['mediaMode']
+    assert session_instance.created_at == datetime.utcfromtimestamp(SESSIONS['content'][0]['createdAt'] / 1000.0)

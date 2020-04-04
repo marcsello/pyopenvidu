@@ -55,7 +55,11 @@ def openvidu_instance(requests_mock):
     yield OpenVidu(URL_BASE, SECRET)
 
 
-def test_config(openvidu_instance, requests_mock):
+#
+# Getting config
+#
+
+def test_get_config(openvidu_instance, requests_mock):
     original = {"version": "2.9.0", "openviduPublicurl": URL_BASE, "openviduCdr": False,
                 "maxRecvBandwidth": 1000, "minRecvBandwidth": 300, "maxSendBandwidth": 1000, "minSendBandwidth": 300,
                 "openviduRecording": True, "openviduRecordingVersion": "2.8.0",
@@ -74,12 +78,21 @@ def test_config(openvidu_instance, requests_mock):
     assert a == original
 
 
-def test_sessions(openvidu_instance):
+#
+# Sessions
+#
+
+
+def test_get_sessions(openvidu_instance):
     sessions = openvidu_instance.sessions
 
     assert len(sessions) == 2
     assert sessions[0].id == "TestSession"
     assert sessions[1].id == "TestSession2"
+
+
+def test_session_count(openvidu_instance):
+    assert openvidu_instance.session_count == 2
 
 
 def test_create_session(openvidu_instance, requests_mock):
@@ -163,10 +176,6 @@ def test_create_session_validation_error(openvidu_instance, requests_mock):
     assert a.called == False
 
 
-def test_session_count(openvidu_instance):
-    assert openvidu_instance.session_count == 2
-
-
 def test_no_sessions(openvidu_instance, requests_mock):
     original = {"numberOfElements": 0, "content": []}
 
@@ -187,9 +196,14 @@ def test_no_sessions_session_count(openvidu_instance, requests_mock):
     assert openvidu_instance.session_count == 0
 
 
-def test_session_missing_session(openvidu_instance):
+def test_get_missing_session(openvidu_instance):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         openvidu_instance.get_session('Nonexistent')
+
+
+#
+# Fetching
+#
 
 
 def test_fetching_deleted(openvidu_instance, requests_mock):
@@ -205,6 +219,7 @@ def test_fetching_deleted(openvidu_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_before_delete.fetch()
 
+
 def test_access_after_close_without_fetch(openvidu_instance, requests_mock):
     session_to_close = openvidu_instance.get_session('TestSession')
     a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession'), status_code=204)
@@ -215,6 +230,7 @@ def test_access_after_close_without_fetch(openvidu_instance, requests_mock):
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         openvidu_instance.get_session('TestSession')
+
 
 def test_inlist_after_close_without_fetch(openvidu_instance, requests_mock):
     session_to_close = openvidu_instance.get_session('TestSession')

@@ -66,6 +66,10 @@ def connection_instance(session_instance):
     yield session_instance.get_connection('vhdxz7abbfirh2lh')
 
 
+#
+# Disconnection
+#
+
 def test_disconnection(connection_instance, requests_mock):
     a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/connection/vhdxz7abbfirh2lh'), json={},
                              status_code=204)
@@ -90,6 +94,10 @@ def test_disconnection_failed_no_session(connection_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         connection_instance.force_disconnect()
 
+
+#
+# Signals
+#
 
 def test_signal(connection_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'api/signal'), status_code=200)
@@ -127,6 +135,10 @@ def test_signal_no_connection(connection_instance, requests_mock):
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         connection_instance.signal('MY_TYPE', "Hello world!")
 
+
+#
+# Unpublish
+#
 
 def test_force_unpublish_all(connection_instance, requests_mock):
     a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
