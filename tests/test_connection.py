@@ -5,6 +5,7 @@
 import pytest
 from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
 from urllib.parse import urljoin
+from datetime import datetime
 
 URL_BASE = 'http://test.openvidu.io:4443/'
 SESSIONS = {"numberOfElements": 2, "content": [
@@ -66,6 +67,10 @@ def connection_instance(session_instance):
     yield session_instance.get_connection('vhdxz7abbfirh2lh')
 
 
+#
+# Disconnection
+#
+
 def test_disconnection(connection_instance, requests_mock):
     a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/connection/vhdxz7abbfirh2lh'), json={},
                              status_code=204)
@@ -90,6 +95,10 @@ def test_disconnection_failed_no_session(connection_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         connection_instance.force_disconnect()
 
+
+#
+# Signals
+#
 
 def test_signal(connection_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'api/signal'), status_code=200)
@@ -118,7 +127,7 @@ def test_signal_no_session(connection_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         connection_instance.signal('MY_TYPE', "Hello world!")
 
-    assert a.called == True
+    assert a.called
 
 
 def test_signal_no_connection(connection_instance, requests_mock):
@@ -128,6 +137,10 @@ def test_signal_no_connection(connection_instance, requests_mock):
         connection_instance.signal('MY_TYPE', "Hello world!")
 
 
+#
+# Unpublish
+#
+
 def test_force_unpublish_all(connection_instance, requests_mock):
     a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
                              json={},
@@ -136,3 +149,24 @@ def test_force_unpublish_all(connection_instance, requests_mock):
     connection_instance.force_unpublish_all_streams()
 
     assert a.called
+
+#
+# Properties
+#
+
+def test_properties(connection_instance):
+
+    assert connection_instance.session_id == SESSIONS['content'][0]['sessionId']
+    assert connection_instance.id == SESSIONS['content'][0]['connections']['content'][0]['connectionId']
+
+    assert connection_instance.created_at == datetime.utcfromtimestamp(
+        SESSIONS['content'][0]['connections']['content'][0]['createdAt'] / 1000.0
+    )
+
+    assert connection_instance.token == SESSIONS['content'][0]['connections']['content'][0]['token']
+    assert connection_instance.client_data == SESSIONS['content'][0]['connections']['content'][0]['clientData']
+    assert connection_instance.server_data == SESSIONS['content'][0]['connections']['content'][0]['serverData']
+    assert connection_instance.platform == SESSIONS['content'][0]['connections']['content'][0]['platform']
+    assert connection_instance.role == SESSIONS['content'][0]['connections']['content'][0]['role']
+
+    assert len(connection_instance.publishers) == len(SESSIONS['content'][0]['connections']['content'][0]['publishers'])

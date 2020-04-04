@@ -67,6 +67,9 @@ def session_instance(openvidu_instance):
 def connection_instance(session_instance):
     yield session_instance.get_connection('vhdxz7abbfirh2lh')
 
+#
+# Unpublish
+#
 
 def test_unpublish(connection_instance, requests_mock):
     a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
@@ -110,6 +113,10 @@ def test_unpublish_ipcam(connection_instance, requests_mock):
 
     assert a.called
 
+
+#
+# Properties
+#
 
 def test_properties(connection_instance):
     p = connection_instance.publishers[0]

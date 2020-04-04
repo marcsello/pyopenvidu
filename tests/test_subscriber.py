@@ -67,6 +67,11 @@ def connection_instance(session_instance):
     yield session_instance.get_connection('maxawd3ysuj1rxvq')
 
 
+#
+# Properties
+#
+
+
 def test_properties(connection_instance):
     s = connection_instance.subscribers[0]
 

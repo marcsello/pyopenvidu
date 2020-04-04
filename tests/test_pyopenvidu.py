@@ -55,7 +55,11 @@ def openvidu_instance(requests_mock):
     yield OpenVidu(URL_BASE, SECRET)
 
 
-def test_config(openvidu_instance, requests_mock):
+#
+# Getting config
+#
+
+def test_get_config(openvidu_instance, requests_mock):
     original = {"version": "2.9.0", "openviduPublicurl": URL_BASE, "openviduCdr": False,
                 "maxRecvBandwidth": 1000, "minRecvBandwidth": 300, "maxSendBandwidth": 1000, "minSendBandwidth": 300,
                 "openviduRecording": True, "openviduRecordingVersion": "2.8.0",
@@ -74,12 +78,21 @@ def test_config(openvidu_instance, requests_mock):
     assert a == original
 
 
-def test_sessions(openvidu_instance):
+#
+# Sessions
+#
+
+
+def test_get_sessions(openvidu_instance):
     sessions = openvidu_instance.sessions
 
     assert len(sessions) == 2
     assert sessions[0].id == "TestSession"
     assert sessions[1].id == "TestSession2"
+
+
+def test_session_count(openvidu_instance):
+    assert openvidu_instance.session_count == 2
 
 
 def test_create_session(openvidu_instance, requests_mock):
@@ -103,8 +116,8 @@ def test_create_session(openvidu_instance, requests_mock):
     session = openvidu_instance.create_session()
 
     assert session.id == "zfgmthb8jl9uellk"
-    assert a.called == True
-    assert b.called == True
+    assert a.called
+    assert b.called
 
     assert a.last_request.json() == {}
 
@@ -130,8 +143,8 @@ def test_create_session_extra(openvidu_instance, requests_mock):
     session = openvidu_instance.create_session('DerpyIsBestPony', 'RELAYED')
 
     assert session.id == "DerpyIsBestPony"
-    assert a.called == True
-    assert b.called == True
+    assert a.called
+    assert b.called
 
     assert a.last_request.json() == {"mediaMode": 'RELAYED', "customSessionId": 'DerpyIsBestPony'}
 
@@ -142,7 +155,7 @@ def test_create_session_conflict(openvidu_instance, requests_mock):
     with pytest.raises(OpenViduSessionExistsError):
         openvidu_instance.create_session('TestSession')
 
-    assert a.called == True
+    assert a.called
 
 
 def test_create_session_bad_parameters(openvidu_instance, requests_mock):
@@ -151,7 +164,7 @@ def test_create_session_bad_parameters(openvidu_instance, requests_mock):
     with pytest.raises(ValueError):
         openvidu_instance.create_session()
 
-    assert a.called == True
+    assert a.called
 
 
 def test_create_session_validation_error(openvidu_instance, requests_mock):
@@ -160,11 +173,7 @@ def test_create_session_validation_error(openvidu_instance, requests_mock):
     with pytest.raises(ValueError):
         openvidu_instance.create_session(media_mode="asd")
 
-    assert a.called == False
-
-
-def test_session_count(openvidu_instance):
-    assert openvidu_instance.session_count == 2
+    assert not a.called
 
 
 def test_no_sessions(openvidu_instance, requests_mock):
@@ -172,9 +181,10 @@ def test_no_sessions(openvidu_instance, requests_mock):
 
     requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
 
-    openvidu_instance.fetch()
+    is_changed = openvidu_instance.fetch()
     sessions = openvidu_instance.sessions
 
+    assert is_changed
     assert len(sessions) == 0
 
 
@@ -183,13 +193,25 @@ def test_no_sessions_session_count(openvidu_instance, requests_mock):
 
     requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
 
-    openvidu_instance.fetch()
+    is_changed = openvidu_instance.fetch()
+
+    assert is_changed
     assert openvidu_instance.session_count == 0
 
 
-def test_session_missing_session(openvidu_instance):
+def test_get_missing_session(openvidu_instance):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         openvidu_instance.get_session('Nonexistent')
+
+
+#
+# Fetching
+#
+
+def test_fetching_nothing_happened(openvidu_instance):
+    is_changed = openvidu_instance.fetch()
+
+    assert not is_changed
 
 
 def test_fetching_deleted(openvidu_instance, requests_mock):
@@ -198,12 +220,14 @@ def test_fetching_deleted(openvidu_instance, requests_mock):
     original = {"numberOfElements": 0, "content": []}
     requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
 
-    openvidu_instance.fetch()
+    is_changed = openvidu_instance.fetch()
 
-    assert session_before_delete.is_valid == False
+    assert not session_before_delete.is_valid
+    assert is_changed
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_before_delete.fetch()
+
 
 def test_access_after_close_without_fetch(openvidu_instance, requests_mock):
     session_to_close = openvidu_instance.get_session('TestSession')
@@ -211,10 +235,11 @@ def test_access_after_close_without_fetch(openvidu_instance, requests_mock):
 
     session_to_close.close()
 
-    assert a.called == True
+    assert a.called
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         openvidu_instance.get_session('TestSession')
+
 
 def test_inlist_after_close_without_fetch(openvidu_instance, requests_mock):
     session_to_close = openvidu_instance.get_session('TestSession')
@@ -222,7 +247,7 @@ def test_inlist_after_close_without_fetch(openvidu_instance, requests_mock):
 
     session_to_close.close()
 
-    assert a.called == True
+    assert a.called
 
     assert len(openvidu_instance.sessions) == 1
     assert openvidu_instance.session_count == 1
@@ -248,9 +273,10 @@ def test_fetching_changed(openvidu_instance, requests_mock):
 
     requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
 
-    openvidu_instance.fetch()
+    is_changed = openvidu_instance.fetch()
 
     assert session_before_change.connection_count == 3
+    assert is_changed
 
 
 def test_fetching_new(openvidu_instance, requests_mock):
@@ -280,7 +306,8 @@ def test_fetching_new(openvidu_instance, requests_mock):
 
     requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
 
-    openvidu_instance.fetch()
+    is_changed = openvidu_instance.fetch()
 
     assert openvidu_instance.session_count == 3
     assert openvidu_instance.get_session('TestSession3').id == 'TestSession3'
+    assert is_changed
