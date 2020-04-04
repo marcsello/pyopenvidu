@@ -116,8 +116,8 @@ def test_create_session(openvidu_instance, requests_mock):
     session = openvidu_instance.create_session()
 
     assert session.id == "zfgmthb8jl9uellk"
-    assert a.called == True
-    assert b.called == True
+    assert a.called
+    assert b.called
 
     assert a.last_request.json() == {}
 
@@ -143,8 +143,8 @@ def test_create_session_extra(openvidu_instance, requests_mock):
     session = openvidu_instance.create_session('DerpyIsBestPony', 'RELAYED')
 
     assert session.id == "DerpyIsBestPony"
-    assert a.called == True
-    assert b.called == True
+    assert a.called
+    assert b.called
 
     assert a.last_request.json() == {"mediaMode": 'RELAYED', "customSessionId": 'DerpyIsBestPony'}
 
@@ -155,7 +155,7 @@ def test_create_session_conflict(openvidu_instance, requests_mock):
     with pytest.raises(OpenViduSessionExistsError):
         openvidu_instance.create_session('TestSession')
 
-    assert a.called == True
+    assert a.called
 
 
 def test_create_session_bad_parameters(openvidu_instance, requests_mock):
@@ -164,7 +164,7 @@ def test_create_session_bad_parameters(openvidu_instance, requests_mock):
     with pytest.raises(ValueError):
         openvidu_instance.create_session()
 
-    assert a.called == True
+    assert a.called
 
 
 def test_create_session_validation_error(openvidu_instance, requests_mock):
@@ -173,7 +173,7 @@ def test_create_session_validation_error(openvidu_instance, requests_mock):
     with pytest.raises(ValueError):
         openvidu_instance.create_session(media_mode="asd")
 
-    assert a.called == False
+    assert not a.called
 
 
 def test_no_sessions(openvidu_instance, requests_mock):
@@ -226,7 +226,7 @@ def test_access_after_close_without_fetch(openvidu_instance, requests_mock):
 
     session_to_close.close()
 
-    assert a.called == True
+    assert a.called
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         openvidu_instance.get_session('TestSession')
@@ -238,7 +238,7 @@ def test_inlist_after_close_without_fetch(openvidu_instance, requests_mock):
 
     session_to_close.close()
 
-    assert a.called == True
+    assert a.called
 
     assert len(openvidu_instance.sessions) == 1
     assert openvidu_instance.session_count == 1

@@ -126,7 +126,7 @@ def test_signal_no_session(connection_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         connection_instance.signal('MY_TYPE', "Hello world!")
 
-    assert a.called == True
+    assert a.called
 
 
 def test_signal_no_connection(connection_instance, requests_mock):

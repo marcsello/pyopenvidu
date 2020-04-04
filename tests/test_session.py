@@ -124,7 +124,7 @@ def test_session_close(session_instance, requests_mock):
     session_instance.close()
 
     assert adapter.called
-    assert session_instance.is_valid == False
+    assert not session_instance.is_valid
 
 
 def test_session_close_missing(session_instance, requests_mock):
@@ -133,7 +133,7 @@ def test_session_close_missing(session_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.close()
 
-    assert session_instance.is_valid == False
+    assert not session_instance.is_valid
 
 
 #
@@ -206,7 +206,7 @@ def test_signal_no_session(session_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
 
-    assert a.called == True
+    assert a.called
 
 
 def test_signal_early_no_session(session_instance, requests_mock):
@@ -216,12 +216,12 @@ def test_signal_early_no_session(session_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.fetch()
 
-    assert b.called == True
+    assert b.called
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
 
-    assert a.called == False
+    assert not a.called
 
 
 def test_signal_no_connection(session_instance, requests_mock):
@@ -245,11 +245,11 @@ def test_session_became_invalid(session_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.fetch()
 
-    assert session_instance.is_valid == False
+    assert not session_instance.is_valid
 
 
 def test_session_is_valid_true(session_instance):
-    assert session_instance.is_valid == True
+    assert session_instance.is_valid
 
 
 def test_other_properties(session_instance):
