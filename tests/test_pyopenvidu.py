@@ -208,6 +208,11 @@ def test_get_missing_session(openvidu_instance):
 # Fetching
 #
 
+def test_fetching_nothing_happened(openvidu_instance):
+    is_changed = openvidu_instance.fetch()
+
+    assert not is_changed
+
 
 def test_fetching_deleted(openvidu_instance, requests_mock):
     session_before_delete = openvidu_instance.get_session('TestSession')
