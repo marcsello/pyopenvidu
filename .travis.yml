@@ -16,7 +16,8 @@ deploy:
   provider: pypi
   distributions: sdist bdist_wheel
   user: "__token__"
-  password: $PYPI_TOKEN
+  password:
+    secure: Rmec2zNwfK9C4sM3yJRuXQZes7lMXaFRbA9LUJiqOB+kQU/uK3GatwXmimtMuaZ6uR0ulWiHLt5qUAKR3YdIrD02WOJ4npb+G9G8h5L8MQ2tWm0lkxDD0jdAauTsWAG0hIA2M15QRBAqlbiqaAqtdW3jhARBc+IklWepovfWHFGL0I+71Ljlig4Wig95wxT3ymgH/t07BabPcXGcNIqB+ccJNKFkQiuk4BvP7VeW9Jg5jOTifYJRGfUo7wVGmw91mO0w6PXjsdnuIapP+HOaBeQGIgD4XD3wcqd0B1TkIESwCKkAh7en7Kw1F4dHkFmm2r0ZmGadBeBwirmfUB4hJfpbZd1XUY6qPg3aXb9Xo1C8pRAmOYVHg9o+Ed7/w7Rd4c7bzc0545HzGeIZOV/EQlI5Dr+iP3AfaImj2VCxasXR8Cn4xtYNON5bakvMHhkHaQj3VISFHFln3/3H663GKWct9DVrvUgY0UECWP7JP9j6DJB5SBxTZk18pbgzdatfjIM0f81jmbUUSjKGrfSIl+nahszHNK7ZSBN6qiW1Yi/S9nm01dSicoHJ4Vmc2PdVV8CPpIif7HBxq9457XM44xKuDTBFf9cnqLWlcqFgOI2NwpI92Nev+p1wTDGOcvkH8bbT9i9tbL0pTi963CUJCkeN58aeAnBEdsezR2clDBs=
   on:
     tags: true
     repo: marcsello/pyopenvidu
