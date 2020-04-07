@@ -2,7 +2,7 @@
 
 __author__ = """Marcell Pünkösd"""
 __email__ = 'punkosdmarcell@rocketmail.com'
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 from .openvidu import OpenVidu
 
