@@ -25,8 +25,8 @@ SESSIONS = {"numberOfElements": 2, "content": [
                                "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
                                "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
                                "subscribers": [
-                                   {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-                                    "publisher": "vhdxz7abbfirh2lh"}]}]}, "recording": False},
+                                   {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"
+                                    }]}]}, "recording": False},
     {"sessionId": "TestSession2", "createdAt": 1538482606338, "mediaMode": "ROUTED", "recordingMode": "MANUAL",
      "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT", "customSessionId": "TestSession",
      "connections": {"numberOfElements": 2, "content": [
@@ -43,9 +43,10 @@ SESSIONS = {"numberOfElements": 2, "content": [
                                "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
                                "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
                                "subscribers": [
-                                   {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-                                    "publisher": "vhdxz7abbfirh2lh"}]}]}, "recording": False}
+                                   {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"}]}]},
+     "recording": False}
 ]}
+
 SECRET = 'MY_SECRET'
 
 
