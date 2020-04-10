@@ -210,3 +210,23 @@ def test_properties_none_fields(session_instance):
     assert connection_instance.role == SESSIONS['content'][0]['connections']['content'][2]['role']
 
     assert len(connection_instance.publishers) == len(SESSIONS['content'][0]['connections']['content'][2]['publishers'])
+
+
+def test_properties_ipcam_fields(openvidu_instance):
+    session_instance = openvidu_instance.get_session('TestSession2')
+    connection_instance = session_instance.get_connection('ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp')
+
+    assert connection_instance.session_id == SESSIONS['content'][1]['sessionId']
+    assert connection_instance.id == SESSIONS['content'][1]['connections']['content'][2]['connectionId']
+
+    assert connection_instance.created_at == datetime.utcfromtimestamp(
+        SESSIONS['content'][1]['connections']['content'][2]['createdAt'] / 1000.0
+    )
+
+    assert connection_instance.token is None
+    assert connection_instance.client_data is None
+    assert connection_instance.server_data == SESSIONS['content'][1]['connections']['content'][2]['serverData']
+    assert connection_instance.platform == SESSIONS['content'][1]['connections']['content'][2]['platform']
+    assert connection_instance.role == SESSIONS['content'][1]['connections']['content'][2]['role']
+
+    assert len(connection_instance.publishers) == len(SESSIONS['content'][1]['connections']['content'][2]['publishers'])

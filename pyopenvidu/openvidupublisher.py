@@ -1,4 +1,5 @@
 """OpenViduPublisher class."""
+from typing import Optional
 from requests_toolbelt.sessions import BaseUrlSession
 from dataclasses import dataclass
 from datetime import datetime
@@ -12,6 +13,7 @@ class OpenViduPublisher(object):
     stream_id: str
     created_at: datetime
     media_options: dict
+    rtsp_uri: Optional[str]
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
         self._session = session
@@ -19,6 +21,7 @@ class OpenViduPublisher(object):
         self.stream_id = data['streamId']
         self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)
         self.media_options = data['mediaOptions']
+        self.rtsp_uri = data.get('rtspUri', None)
 
     def force_unpublish(self):
         """
