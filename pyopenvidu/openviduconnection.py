@@ -1,5 +1,5 @@
 """OpenViduConnection class."""
-from typing import List
+from typing import List, Optional
 from requests_toolbelt.sessions import BaseUrlSession
 from dataclasses import dataclass
 from .exceptions import OpenViduConnectionDoesNotExistsError, OpenViduSessionDoesNotExistsError
@@ -23,8 +23,8 @@ class OpenViduConnection(object):
     platform: str
     token: str
     role: str
-    server_data: str
-    client_data: str
+    server_data: Optional[str]
+    client_data: Optional[str]
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
         self._session = session
@@ -36,8 +36,8 @@ class OpenViduConnection(object):
         self.platform = data['platform']
         self.token = data['token']
         self.role = data['role']
-        self.server_data = data['serverData']
-        self.client_data = data['clientData']
+        self.server_data = data.get('serverData', None)
+        self.client_data = data.get('clientData', None)
 
         # set publishers
         publishers = []
