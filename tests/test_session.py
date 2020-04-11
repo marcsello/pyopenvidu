@@ -4,7 +4,7 @@
 
 import pytest
 from datetime import datetime
-from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
+from pyopenvidu import OpenVidu, OpenViduError, OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
 from urllib.parse import urljoin
 from copy import deepcopy
 
@@ -252,6 +252,152 @@ def test_signal_no_connection(session_instance, requests_mock):
 
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
+
+
+#
+# IPCAM
+#
+
+def test_publish_simple(session_instance, requests_mock):
+    new_connection_data = {
+        "connectionId": "ipc_IPCAM_rtsp_A8MJ_91_191_213_49_555_live_mpeg4_sdp",
+        "createdAt": 1582121476380,
+        "location": "unknown",
+        "platform": "IPCAM",
+        "role": "PUBLISHER",
+        "serverData": "",
+        "publishers": [
+            {
+                "createdAt": 1582121476439,
+                "streamId": "str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp",
+                "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
+                "mediaOptions": {
+                    "hasAudio": True,
+                    "audioActive": True,
+                    "hasVideo": True,
+                    "videoActive": True,
+                    "typeOfVideo": "IPCAM",
+                    "frameRate": None,
+                    "videoDimensions": None,
+                    "filter": {},
+                    "adaptativeBitrate": True,
+                    "onlyPlayWithSubscribers": True
+                }
+            }
+        ],
+        "subscribers": []
+    }
+
+    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json=new_connection_data)
+
+    new_connection = session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
+
+    assert a.last_request.json() == {
+        "type": "IPCAM",
+        "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
+        "adaptativeBitrate": True,
+        "onlyPlayWithSubscribers": True,
+        "data": ''
+    }
+
+    assert a.called
+
+    assert new_connection.id == 'ipc_IPCAM_rtsp_A8MJ_91_191_213_49_555_live_mpeg4_sdp'
+    assert new_connection.role == 'PUBLISHER'
+    assert new_connection.client_data is None
+    assert new_connection.token is None
+    assert new_connection.server_data == ''
+    assert new_connection.created_at == datetime.utcfromtimestamp(1582121476380 / 1000.0)
+    assert new_connection.publishers[0].created_at == datetime.utcfromtimestamp(1582121476439 / 1000.0)
+    assert new_connection.publishers[0].stream_id == 'str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp'
+    assert new_connection.publishers[0].rtsp_uri == 'rtsp://91.191.213.50:554/live_mpeg4.sdp'
+    assert new_connection.publishers[0].session_id == 'TestSession'
+    assert new_connection.publishers[0].media_options == new_connection_data['publishers'][0]['mediaOptions']
+
+
+def test_publish_extra(session_instance, requests_mock):
+    new_connection_data = {
+        "connectionId": "ipc_IPCAM_rtsp_A8MJ_91_191_213_49_555_live_mpeg4_sdp",
+        "createdAt": 1582121476380,
+        "location": "unknown",
+        "platform": "IPCAM",
+        "role": "PUBLISHER",
+        "serverData": "TEST_DATA",
+        "publishers": [
+            {
+                "createdAt": 1582121476439,
+                "streamId": "str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp",
+                "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
+                "mediaOptions": {
+                    "hasAudio": True,
+                    "audioActive": True,
+                    "hasVideo": True,
+                    "videoActive": True,
+                    "typeOfVideo": "IPCAM",
+                    "frameRate": None,
+                    "videoDimensions": None,
+                    "filter": {},
+                    "adaptativeBitrate": False,
+                    "onlyPlayWithSubscribers": True
+                }
+            }
+        ],
+        "subscribers": []
+    }
+
+    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json=new_connection_data)
+
+    new_connection = session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp", "TEST_DATA",
+                                              adaptive_bitrate=False)
+
+    assert a.last_request.json() == {
+        "type": "IPCAM",
+        "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
+        "adaptativeBitrate": False,
+        "onlyPlayWithSubscribers": True,
+        "data": 'TEST_DATA'
+    }
+
+    assert a.called
+
+    assert new_connection.id == 'ipc_IPCAM_rtsp_A8MJ_91_191_213_49_555_live_mpeg4_sdp'
+    assert new_connection.role == 'PUBLISHER'
+    assert new_connection.client_data is None
+    assert new_connection.token is None
+    assert new_connection.server_data == 'TEST_DATA'
+    assert new_connection.created_at == datetime.utcfromtimestamp(1582121476380 / 1000.0)
+    assert new_connection.publishers[0].created_at == datetime.utcfromtimestamp(1582121476439 / 1000.0)
+    assert new_connection.publishers[0].stream_id == 'str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp'
+    assert new_connection.publishers[0].rtsp_uri == 'rtsp://91.191.213.50:554/live_mpeg4.sdp'
+    assert new_connection.publishers[0].session_id == 'TestSession'
+    assert new_connection.publishers[0].media_options == new_connection_data['publishers'][0]['mediaOptions']
+
+
+def test_publish_invalid_session(session_instance, requests_mock):
+    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json={}, status_code=404)
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
+
+    assert a.called
+
+
+def test_publish_value_error(session_instance, requests_mock):
+    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json={}, status_code=400)
+
+    with pytest.raises(ValueError):
+        session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
+
+    assert a.called
+
+
+def test_publish_server_error(session_instance, requests_mock):
+    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json={}, status_code=500)
+
+    with pytest.raises(OpenViduError):
+        session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
+
+    assert a.called
 
 
 #
