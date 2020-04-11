@@ -29,7 +29,6 @@ class OpenViduSession(object):
         To update every OpenViduSession object owned by OpenVidu object, call OpenVidu.fetch()
 
         :return: True if the OpenViduSession status has changed with respect to the server, False if not. This applies to any property or sub-property of the object
-
         """
         r = self._session.get(f"api/sessions/{self.id}")
 
@@ -77,7 +76,8 @@ class OpenViduSession(object):
 
         In the video bandwidth settings 0 means unconstrained. Setting any of them (other than None) overrides the values configured in for the server.
 
-        https://openvidu.io/docs/reference-docs/REST-API/#post-apitokens
+        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apitokens
+
         :param role: Allowed values: `SUBSCRIBER`, `PUBLISHER` or `MODERATOR`
         :param data: metadata associated to this token (usually participant's information)
         :param video_max_recv_bandwidth: Maximum number of Kbps that the client owning the token will be able to receive from Kurento Media Server.
@@ -157,7 +157,8 @@ class OpenViduSession(object):
         Sends a signal to all participants in the session or specific connections if the `to` property defined.
         OpenViduConnection objects also implement this method.
 
-        https://openvidu.io/docs/reference-docs/REST-API/#post-apisignal
+        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apisignal
+
         :param type_: Type of the signal. In the body example of the table above, only users subscribed to Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal') will trigger signals of any type.
         :param data: Actual data of the signal.
         :param to: List of OpenViduConnection objects to which you want to send the signal. If this property is not set (None) the signal will be sent to all participants of the session.
