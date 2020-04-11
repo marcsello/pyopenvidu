@@ -13,11 +13,13 @@ PyOpenVidu
         :target: https://pyopenvidu.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://api.codacy.com/project/badge/Grade/c32a2cb3f2e247aa8e7ad9546e64537a
+        :target: https://www.codacy.com/manual/marcsello/pyopenvidu?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=marcsello/pyopenvidu&amp;utm_campaign=Badge_Grade
 
 
+Python interface to the OpenVidu_ WebRTC videoconverence library.
 
-Python interface to the OpenVidu WebRTC videoconverence library.
-
+.. _OpenVidu: https://openvidu.io/
 
 * Free software: MIT license
 * Documentation: https://pyopenvidu.readthedocs.io.
