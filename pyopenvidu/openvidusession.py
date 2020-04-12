@@ -196,6 +196,9 @@ class OpenViduSession(object):
         """
         Publishes a new IPCAM rtsp stream to the session.
 
+        Unlike `OpenVidu.create_session` this method does not call fetch() automatically, since the server returns enough data to construct the connection object.
+        Keep in mind, that if you want the newly created Connection to appear in the `connections` list, you should call fetch() before accessing the list!
+
         https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apisessionsltsession_idgtconnection
 
         :param rtsp_uri: RTSP URI of the IP camera. For example: `rtsp://your.camera.ip:7777/path`.
