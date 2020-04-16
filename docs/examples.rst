@@ -39,6 +39,10 @@ Send signals::
     # Note: This does not make any subsequent API calls, as the connections information is already stored in memory
     session.signal("MY_TYPE", "Yolo world!", [conn for i, conn in enumerate(session.connections) if i % 2 == 0])
 
+Connect to IP camera::
+
+    session.publish("rtsp://mydomain.net:1935/live/stream")
+
 Close a session::
 
     session.close()
