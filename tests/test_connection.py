@@ -40,7 +40,7 @@ SESSIONS = {"numberOfElements": 2, "content": [
      ]}, "recording": False},
     {"sessionId": "TestSession2", "createdAt": 1538482606338, "mediaMode": "ROUTED", "recordingMode": "MANUAL",
      "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT", "customSessionId": "TestSession",
-     "connections": {"numberOfElements": 2, "content": [
+     "connections": {"numberOfElements": 3, "content": [
          {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
           "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
           "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
@@ -54,7 +54,17 @@ SESSIONS = {"numberOfElements": 2, "content": [
                                "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
                                "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
                                "subscribers": [
-                                   {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"}]}]},
+                                   {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"}]},
+         {"connectionId": "ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp", "createdAt": 1582121476379,
+          "location": "unknown", "platform": "IPCAM", "role": "PUBLISHER", "serverData": "MY_IP_CAMERA", "publishers": [
+             {"createdAt": 1582121476439,
+              "streamId": "str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp",
+              "rtspUri": "rtsp://91.191.213.49:554/live_mpeg4.sdp",
+              "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
+                               "typeOfVideo": "IPCAM", "frameRate": None, "videoDimensions": None, "filter": {},
+                               "adaptativeBitrate": True, "onlyPlayWithSubscribers": True}}], "subscribers": []}
+
+     ]},
      "recording": False}
 ]}
 SECRET = 'MY_SECRET'
@@ -200,3 +210,23 @@ def test_properties_none_fields(session_instance):
     assert connection_instance.role == SESSIONS['content'][0]['connections']['content'][2]['role']
 
     assert len(connection_instance.publishers) == len(SESSIONS['content'][0]['connections']['content'][2]['publishers'])
+
+
+def test_properties_ipcam_fields(openvidu_instance):
+    session_instance = openvidu_instance.get_session('TestSession2')
+    connection_instance = session_instance.get_connection('ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp')
+
+    assert connection_instance.session_id == SESSIONS['content'][1]['sessionId']
+    assert connection_instance.id == SESSIONS['content'][1]['connections']['content'][2]['connectionId']
+
+    assert connection_instance.created_at == datetime.utcfromtimestamp(
+        SESSIONS['content'][1]['connections']['content'][2]['createdAt'] / 1000.0
+    )
+
+    assert connection_instance.token is None
+    assert connection_instance.client_data is None
+    assert connection_instance.server_data == SESSIONS['content'][1]['connections']['content'][2]['serverData']
+    assert connection_instance.platform == SESSIONS['content'][1]['connections']['content'][2]['platform']
+    assert connection_instance.role == SESSIONS['content'][1]['connections']['content'][2]['role']
+
+    assert len(connection_instance.publishers) == len(SESSIONS['content'][1]['connections']['content'][2]['publishers'])

@@ -3,7 +3,7 @@ from typing import Iterator, List
 from datetime import datetime
 from requests_toolbelt.sessions import BaseUrlSession
 
-from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
+from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError, OpenViduError
 from .openviduconnection import OpenViduConnection
 
 
@@ -191,6 +191,45 @@ class OpenViduSession(object):
             raise OpenViduConnectionDoesNotExistsError()
 
         r.raise_for_status()
+
+    def publish(self, rtsp_uri: str, data: str = '', adaptive_bitrate: bool = True,
+                only_play_with_subscribers: bool = True, type_: str = "IPCAM") -> OpenViduConnection:
+        """
+        Publishes a new IPCAM rtsp stream to the session.
+
+        Unlike `OpenVidu.create_session` this method does not call fetch() automatically, since the server returns enough data to construct the connection object.
+        Keep in mind, that if you want the newly created Connection to appear in the `connections` list, you should call fetch() before accessing the list!
+
+        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apisessionsltsession_idgtconnection
+
+        :param rtsp_uri: RTSP URI of the IP camera. For example: `rtsp://your.camera.ip:7777/path`.
+        :param data: Metadata you want to associate to the camera's participant.
+        :param adaptive_bitrate: Whether to use adaptive bitrate or not.
+        :param only_play_with_subscribers: Enable the IP camera stream only when some user is subscribed to it.
+        :param type_: Which type of stream will be published. Defaults to `IPCAM`.
+        :return: An OpenVidu connection object represents the newly created connection.
+        """
+        if not self._data:  # Fail early... and always
+            raise OpenViduSessionDoesNotExistsError()
+
+        parameters = {
+            "type": type_,
+            "rtspUri": rtsp_uri,
+            "adaptativeBitrate": adaptive_bitrate,
+            "onlyPlayWithSubscribers": only_play_with_subscribers,
+            "data": data
+        }
+
+        r = self._session.post(f'api/sessions/{self.id}/connection', json=parameters)
+
+        if r.status_code == 404:
+            raise OpenViduSessionDoesNotExistsError()
+        elif r.status_code == 400:
+            raise ValueError()
+        elif r.status_code == 500:
+            raise OpenViduError(r.content)
+
+        return OpenViduConnection(self._session, self.id, r.json())
 
     @property
     def connection_count(self) -> int:

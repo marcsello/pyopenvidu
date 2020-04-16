@@ -21,7 +21,7 @@ class OpenViduConnection(object):
     publishers: List[OpenViduPublisher]
     subscribers: List[OpenViduSubscriber]
     platform: str
-    token: str
+    token: Optional[str]
     role: str
     server_data: Optional[str]
     client_data: Optional[str]
@@ -34,7 +34,7 @@ class OpenViduConnection(object):
         self.session_id = session_id
         self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)
         self.platform = data['platform']
-        self.token = data['token']
+        self.token = data.get('token', None)
         self.role = data['role']
         self.server_data = data.get('serverData', None)
         self.client_data = data.get('clientData', None)
