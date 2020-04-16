@@ -7,7 +7,7 @@ In PyOpenVidu there are two kind of objects: dynamic and static. This section ai
 Dynamic and static objects
 --------------------------
 
-The dynamic objects implement a `fetch()` method that can be used to update it's internal representation.
+The **dynamic objects** implement a `fetch()` method that can be used to update it's internal representation.
 Sometimes those objects have such a function that updates the internal representation as a side effect.
 
 
@@ -40,7 +40,10 @@ Sometimes those objects have such a function that updates the internal represent
      - `close()`
      - This deletes the internal representation of that Session. All methods after this call will raise `OpenViduSessionDoesNotExistsError` exception, except `is_valid`
 
-Static objects are not designed to update their internal representation, thus not implementing a `fetch()` method.
+Please note, that altrough `OpenViduSession.publish(...)` returns with a static connection object, it does not update the internal representation of it's parent (`OpenViduSession.fetch()` must be called for the new connection to appear). The reason for this is that the API returns the full object, so a subsequent update is not required and unlike `OpenVidu.create_session(...)` this call returns a static object instead of a dynamic one.
+
+
+**Static objects** are not designed to update their internal representation, thus not implementing a `fetch()` method.
 Such objects should not be reused at all, and must be considered invalid after any changes made to them by other calls.
 A new version of those objects could be requested by calling the `fetch()` method of the dynamic object that provides them.
 
