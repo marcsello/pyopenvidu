@@ -80,7 +80,6 @@ class OpenViduConnection(object):
 
         :param type_: Type of the signal. In the body example of the table above, only users subscribed to Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal') will trigger signals of any type.
         :param data: Actual data of the signal.
-        :param to: List of OpenViduConnection objects to which you want to send the signal. If this property is not set (None) the signal will be sent to all participants of the session.
         """
 
         parameters = {
