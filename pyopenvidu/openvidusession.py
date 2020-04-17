@@ -15,11 +15,10 @@ class OpenViduSession(object):
 
     def __init__(self, session: BaseUrlSession, data: dict):
         """
-        The constructor of this class is intended for internal use. Please use OpenVidu.get_session call to instantiate.
-
-        :param session: The requests session object used for communication.
-        :param data: The initial internal data stored of the session.
+        This is meant for internal use, thus you should not call it.
+        Use `OpenVidu.get_session` to get an instance of this class.
         """
+
         self._session = session
         self._data = data
 

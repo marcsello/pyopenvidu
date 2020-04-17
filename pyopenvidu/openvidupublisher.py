@@ -16,6 +16,11 @@ class OpenViduPublisher(object):
     rtsp_uri: Optional[str]
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
+        """
+        This is meant for internal use, thus you should not call it.
+        Use `OpenViduConnection.publishers` to get an instance of this class.
+        """
+
         self._session = session
         self.session_id = session_id
         self.stream_id = data['streamId']

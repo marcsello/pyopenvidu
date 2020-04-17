@@ -27,6 +27,11 @@ class OpenViduConnection(object):
     client_data: Optional[str]
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
+        """
+        This is meant for internal use, thus you should not call it.
+        Use `OpenViduSession.connections` to get an instance of this class.
+        """
+
         self._session = session
 
         # set property

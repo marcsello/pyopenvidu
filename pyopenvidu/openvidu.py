@@ -17,7 +17,6 @@ class OpenVidu(object):
 
     def __init__(self, url: str, secret: str):
         """
-
         :param url: The url to reach your OpenVidu Server instance. Typically something like https://localhost:4443/
         :param secret: Secret for your OpenVidu Server
         """
@@ -124,7 +123,8 @@ class OpenVidu(object):
 
         :return: A list of OpenViduSession objects.
         """
-        return [sess for sess in self._openvidu_sessions.values() if sess.is_valid] # yeah... the fetch() hell just begun
+        return [sess for sess in self._openvidu_sessions.values() if
+                sess.is_valid]  # yeah... the fetch() hell just begun
 
     @property
     def session_count(self) -> int:
