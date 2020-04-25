@@ -1,6 +1,7 @@
 """OpenViduSession class."""
 from typing import Iterator, List
 from datetime import datetime
+from threading import RLock
 from requests_toolbelt.sessions import BaseUrlSession
 
 from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError, OpenViduError
@@ -13,7 +14,7 @@ class OpenViduSession(object):
     A session is a group of users sharing communicating each other.
     """
 
-    def __init__(self, session: BaseUrlSession, lock: RWLockFair, data: dict):
+    def __init__(self, session: BaseUrlSession, lock: RLock, data: dict):
         """
         This is meant for internal use, thus you should not call it.
         Use `OpenVidu.get_session` to get an instance of this class.
