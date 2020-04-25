@@ -12,6 +12,11 @@ class OpenViduSubscriber(object):
     created_at: datetime
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
+        """
+        This is meant for internal use, thus you should not call it.
+        Use `OpenViduConnection.subscribers` to get an instance of this class.
+        """
+
         self._session = session
         self.session_id = session_id
         self.stream_id = data['streamId']

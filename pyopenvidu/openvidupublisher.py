@@ -1,4 +1,5 @@
 """OpenViduPublisher class."""
+from typing import Optional
 from requests_toolbelt.sessions import BaseUrlSession
 from dataclasses import dataclass
 from datetime import datetime
@@ -12,13 +13,20 @@ class OpenViduPublisher(object):
     stream_id: str
     created_at: datetime
     media_options: dict
+    rtsp_uri: Optional[str]
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
+        """
+        This is meant for internal use, thus you should not call it.
+        Use `OpenViduConnection.publishers` to get an instance of this class.
+        """
+
         self._session = session
         self.session_id = session_id
         self.stream_id = data['streamId']
         self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)
         self.media_options = data['mediaOptions']
+        self.rtsp_uri = data.get('rtspUri', None)
 
     def force_unpublish(self):
         """
@@ -26,7 +34,7 @@ class OpenViduPublisher(object):
         After this call, the instace of the object, and the parent OpenViduConnection instance should be considered invalid.
         Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
 
-        https://openvidu.io/docs/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
+        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
         """
         r = self._session.delete(f"api/sessions/{self.session_id}/stream/{self.stream_id}")
         if r.status_code == 404:

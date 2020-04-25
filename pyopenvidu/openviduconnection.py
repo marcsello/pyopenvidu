@@ -1,5 +1,5 @@
 """OpenViduConnection class."""
-from typing import List
+from typing import List, Optional
 from requests_toolbelt.sessions import BaseUrlSession
 from dataclasses import dataclass
 from .exceptions import OpenViduConnectionDoesNotExistsError, OpenViduSessionDoesNotExistsError
@@ -21,12 +21,17 @@ class OpenViduConnection(object):
     publishers: List[OpenViduPublisher]
     subscribers: List[OpenViduSubscriber]
     platform: str
-    token: str
+    token: Optional[str]
     role: str
-    server_data: str
-    client_data: str
+    server_data: Optional[str]
+    client_data: Optional[str]
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
+        """
+        This is meant for internal use, thus you should not call it.
+        Use `OpenViduSession.connections` to get an instance of this class.
+        """
+
         self._session = session
 
         # set property
@@ -34,10 +39,10 @@ class OpenViduConnection(object):
         self.session_id = session_id
         self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)
         self.platform = data['platform']
-        self.token = data['token']
+        self.token = data.get('token', None)
         self.role = data['role']
-        self.server_data = data['serverData']
-        self.client_data = data['clientData']
+        self.server_data = data.get('serverData', None)
+        self.client_data = data.get('clientData', None)
 
         # set publishers
         publishers = []
@@ -57,7 +62,7 @@ class OpenViduConnection(object):
         Forces the user represented by connection to leave the session.
         Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
 
-        https://openvidu.io/docs/reference-docs/REST-API/#delete-apisessionsltsession_idgtconnectionltconnection_idgt
+        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#delete-apisessionsltsession_idgtconnectionltconnection_idgt
         """
         r = self._session.delete(f"api/sessions/{self.session_id}/connection/{self.id}")
         if r.status_code == 404:
@@ -71,10 +76,10 @@ class OpenViduConnection(object):
         """
         Sends a signal to this connection.
 
-        https://openvidu.io/docs/reference-docs/REST-API/#post-apisignal
+        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apisignal
+
         :param type_: Type of the signal. In the body example of the table above, only users subscribed to Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal') will trigger signals of any type.
         :param data: Actual data of the signal.
-        :param to: List of OpenViduConnection objects to which you want to send the signal. If this property is not set (None) the signal will be sent to all participants of the session.
         """
 
         parameters = {
@@ -104,7 +109,7 @@ class OpenViduConnection(object):
         After this call, the instace of the object, should be considered invalid.
         Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
 
-        https://openvidu.io/docs/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
+        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
         """
         for publisher in self.publishers:
             publisher.force_unpublish()

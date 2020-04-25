@@ -2,6 +2,13 @@
 History
 =======
 
+0.1.3 (2020-04-26)
+------------------
+
+* Implemented thread safety for the dynamic objects
+* Added IPCAM publishing option.
+* Updated and restructured docuementation
+
 0.1.2 (2020-04-07)
 ------------------
 

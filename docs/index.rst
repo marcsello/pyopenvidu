@@ -2,14 +2,14 @@ Welcome to PyOpenVidu's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    readme
    installation
    examples
    fetching
-   source/modules
+   source/classes
    contributing
    authors
    history
