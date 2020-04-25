@@ -43,3 +43,8 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/364e46d54bc04aefaa3e6154c7ccaaa8
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/manual/marcsello/pyopenvidu?utm_source=github.com&utm_medium=referral&utm_content=marcsello/pyopenvidu&utm_campaign=Badge_Grade_Dashboard
