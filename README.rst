@@ -13,7 +13,7 @@ PyOpenVidu
         :target: https://pyopenvidu.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://api.codacy.com/project/badge/Grade/c32a2cb3f2e247aa8e7ad9546e64537a
+.. image:: https://api.codacy.com/project/badge/Grade/53a97676fca041f9bfcaa6a7bc69ac1f
         :target: https://www.codacy.com/manual/marcsello/pyopenvidu?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=marcsello/pyopenvidu&amp;utm_campaign=Badge_Grade
 
 
