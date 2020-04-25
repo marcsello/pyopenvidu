@@ -1,6 +1,5 @@
 """OpenViduSession class."""
 from typing import Iterator, List
-from readerwriterlock.rwlock import RWLockFair
 from datetime import datetime
 from requests_toolbelt.sessions import BaseUrlSession
 
