@@ -128,10 +128,24 @@ def test_session_token_validation_error(session_instance):
         session_instance.generate_token(role='abc')
 
 
+def test_token_invalid_session_early(session_instance):
+    session_instance._data = {}
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        session_instance.generate_token()
+
+
 def test_session_token_missing_session(session_instance, requests_mock):
     requests_mock.post(urljoin(URL_BASE, 'api/tokens'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
+        session_instance.generate_token()
+
+
+def test_session_token_serverside_validation_error(session_instance, requests_mock):
+    requests_mock.post(urljoin(URL_BASE, 'api/tokens'), json={}, status_code=400)
+
+    with pytest.raises(ValueError):
         session_instance.generate_token()
 
 
@@ -162,6 +176,14 @@ def test_session_close_missing(session_instance, requests_mock):
 # Connections
 #
 
+def test_connection_invalid_session_missing(session_instance):
+
+    session_instance._data = {}
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        c = list(session_instance.connections)
+
+
 def test_connection(session_instance):
     conn = session_instance.get_connection('vhdxz7abbfirh2lh')  # magic string
 
@@ -171,6 +193,15 @@ def test_connection(session_instance):
 def test_missing_connection(session_instance):
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         session_instance.get_connection('abc')
+
+
+
+def test_connection_invalid_session_early(session_instance):
+
+    session_instance._data = {}
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        conn = session_instance.get_connection('vhdxz7abbfirh2lh')
 
 
 def test_connections(session_instance):
@@ -184,6 +215,12 @@ def test_connections(session_instance):
 
 def test_connections_count(session_instance):
     assert session_instance.connection_count == 3
+
+def test_connections_count_invalid_session_early(session_instance):
+    session_instance._data = {}
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        a = session_instance.connection_count
 
 
 #
@@ -371,6 +408,13 @@ def test_publish_extra(session_instance, requests_mock):
     assert new_connection.publishers[0].rtsp_uri == 'rtsp://91.191.213.50:554/live_mpeg4.sdp'
     assert new_connection.publishers[0].session_id == 'TestSession'
     assert new_connection.publishers[0].media_options == new_connection_data['publishers'][0]['mediaOptions']
+
+
+def test_publish_invalid_session_fail_early(session_instance, requests_mock):
+    session_instance._data = {}
+
+    with pytest.raises(OpenViduSessionDoesNotExistsError):
+        session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
 
 def test_publish_invalid_session(session_instance, requests_mock):
