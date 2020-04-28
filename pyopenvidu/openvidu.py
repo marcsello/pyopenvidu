@@ -16,10 +16,11 @@ class OpenVidu(object):
     This object represents a OpenVidu server instance.
     """
 
-    def __init__(self, url: str, secret: str):
+    def __init__(self, url: str, secret: str, initial_fetch: bool = True):
         """
         :param url: The url to reach your OpenVidu Server instance. Typically something like https://localhost:4443/
         :param secret: Secret for your OpenVidu Server
+        :param initial_fetch: Enable the initial fetching on object creation. Defaults to True.
         """
         self._session = BaseUrlSession(base_url=url)
         self._session.auth = HTTPBasicAuth('OPENVIDUAPP', secret)
@@ -31,7 +32,9 @@ class OpenVidu(object):
         self._lock = RLock()
 
         self._openvidu_sessions = {}  # id:object
-        self.fetch()  # initial fetch
+
+        if initial_fetch:
+            self.fetch()  # initial fetch
 
     def fetch(self) -> bool:
         """
