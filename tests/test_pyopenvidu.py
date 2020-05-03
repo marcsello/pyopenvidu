@@ -3,6 +3,7 @@
 """Tests for OpenVidu object"""
 
 import pytest
+import requests.exceptions
 from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError, OpenViduSessionExistsError
 from urllib.parse import urljoin
 from copy import deepcopy
@@ -452,3 +453,41 @@ def test_fetch_with_no_fetch(no_fetch_openvidu_instance, requests_mock):
     assert len(sessions) == 2
     assert sessions[0].id == "TestSession"
     assert sessions[1].id == "TestSession2"
+
+
+def test_timeout(requests_mock):
+    openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False, timeout=2)
+
+    # This will always raise the exception, regardless if timeout is set or not
+    a = requests_mock.get(urljoin(URL_BASE, 'api/sessions'), exc=requests.exceptions.ConnectTimeout)
+
+    with pytest.raises(requests.exceptions.ConnectTimeout):
+        openvidu_instance.fetch()
+
+    assert a.called
+
+
+def test_timeout2_int(mocker):
+    # So we test if the value properly set
+    openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False, timeout=2)
+
+    mocker.patch.object(requests.Session, "request", autospec=True)
+
+    openvidu_instance.fetch()
+
+    args, kwargs = requests.Session.request.call_args
+
+    assert kwargs['timeout'] == 2
+
+
+def test_timeout2_tuple(mocker):
+    # So we test if the value properly set
+    openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False, timeout=(1, 2))
+
+    mocker.patch.object(requests.Session, "request", autospec=True)
+
+    openvidu_instance.fetch()
+
+    args, kwargs = requests.Session.request.call_args
+
+    assert kwargs['timeout'] == (1, 2)
