@@ -2,6 +2,15 @@
 History
 =======
 
+0.1.4 (2020-05-24)
+------------------
+
+* Added timeouts.
+* Added possibility to disable initial fetching.
+* Fixed some mistakes in the documentation.
+* Reached 100% code coverage.
+
+
 0.1.3 (2020-04-26)
 ------------------
 
