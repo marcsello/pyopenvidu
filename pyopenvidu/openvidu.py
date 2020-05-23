@@ -1,5 +1,6 @@
 """OpenVidu class."""
-from typing import List
+from typing import List, Union
+from functools import partial
 from threading import RLock
 
 from requests_toolbelt.sessions import BaseUrlSession
@@ -16,10 +17,12 @@ class OpenVidu(object):
     This object represents a OpenVidu server instance.
     """
 
-    def __init__(self, url: str, secret: str):
+    def __init__(self, url: str, secret: str, initial_fetch: bool = True, timeout: Union[int, tuple, None] = None):
         """
         :param url: The url to reach your OpenVidu Server instance. Typically something like https://localhost:4443/
         :param secret: Secret for your OpenVidu Server
+        :param initial_fetch: Enable the initial fetching on object creation. Defaults to `True`. If set to `False` a `fetc()` must be called before doing anything with the object. In most scenarios you won't need to change this.
+        :param timeout: Set timeout to all Requests to the OpenVidu server. Default: None = No timeout. See https://2.python-requests.org/en/latest/user/advanced/#timeouts for possible values.
         """
         self._session = BaseUrlSession(base_url=url)
         self._session.auth = HTTPBasicAuth('OPENVIDUAPP', secret)
@@ -28,10 +31,14 @@ class OpenVidu(object):
             'User-Agent': user_agent('PyOpenVidu', __version__)
         })
 
+        self._session.request = partial(self._session.request, timeout=timeout)
+
         self._lock = RLock()
 
         self._openvidu_sessions = {}  # id:object
-        self.fetch()  # initial fetch
+
+        if initial_fetch:
+            self.fetch()  # initial fetch
 
     def fetch(self) -> bool:
         """

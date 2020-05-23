@@ -9,6 +9,7 @@ Welcome to PyOpenVidu's documentation!
    installation
    examples
    fetching
+   advanced
    source/classes
    contributing
    authors

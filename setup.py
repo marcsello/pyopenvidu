@@ -52,6 +52,6 @@ setup(
         "Code": "https://github.com/marcsello/pyopenvidu",
         "Issue tracker": "https://github.com/marcsello/pyopenvidu/issues",
     },
-    version='0.1.3',
+    version='0.1.4',
     zip_safe=False,
 )
