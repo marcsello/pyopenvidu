@@ -21,7 +21,7 @@ class OpenVidu(object):
         """
         :param url: The url to reach your OpenVidu Server instance. Typically something like https://localhost:4443/
         :param secret: Secret for your OpenVidu Server
-        :param initial_fetch: Enable the initial fetching on object creation. Defaults to True.
+        :param initial_fetch: Enable the initial fetching on object creation. Defaults to `True`. If set to `False` a `fetc()` must be called before doing anything with the object. In most scenarios you won't need to change this.
         :param timeout: Set timeout to all Requests to the OpenVidu server. Default: None = No timeout. See https://2.python-requests.org/en/latest/user/advanced/#timeouts for possible values.
         """
         self._session = BaseUrlSession(base_url=url)
