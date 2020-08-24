@@ -23,7 +23,7 @@ Fetch session information::
 
     # Fetch a specific session info from the server
     session.fetch()
-    connections = session.getActiveConnections()
+    connections = session.connections
 
 
 Send signals::
