@@ -64,7 +64,7 @@ class OpenViduConnection(object):
 
         https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#delete-apisessionsltsession_idgtconnectionltconnection_idgt
         """
-        r = self._session.delete(f"api/sessions/{self.session_id}/connection/{self.id}")
+        r = self._session.delete(f"sessions/{self.session_id}/connection/{self.id}")
         if r.status_code == 404:
             raise OpenViduConnectionDoesNotExistsError()
         if r.status_code == 400:
@@ -92,7 +92,7 @@ class OpenViduConnection(object):
         parameters = {k: v for k, v in parameters.items() if v is not None}
 
         # send request
-        r = self._session.post('api/signal', json=parameters)
+        r = self._session.post('signal', json=parameters)
 
         if r.status_code == 404:
             raise OpenViduSessionDoesNotExistsError()

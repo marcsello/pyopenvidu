@@ -36,7 +36,7 @@ class OpenViduPublisher(object):
 
         https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
         """
-        r = self._session.delete(f"api/sessions/{self.session_id}/stream/{self.stream_id}")
+        r = self._session.delete(f"sessions/{self.session_id}/stream/{self.stream_id}")
         if r.status_code == 404:
             raise OpenViduStreamDoesNotExistsError()
         if r.status_code == 400:

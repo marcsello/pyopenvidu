@@ -117,7 +117,7 @@ class OpenVidu(object):
             parameters = {k: v for k, v in parameters.items() if v is not None}
 
             # send request
-            r = self._session.post('api/sessions', json=parameters)
+            r = self._session.post('sessions', json=parameters)
 
             if r.status_code == 409:
                 raise OpenViduSessionExistsError()

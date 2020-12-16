@@ -53,7 +53,7 @@ class OpenViduSession(object):
         Further calls to this object will fail.
         """
         with self._lock:
-            r = self._session.delete(f"/api/sessions/{self.id}")
+            r = self._session.delete(f"sessions/{self.id}")
 
             if r.status_code == 404:
                 self._data = {}
@@ -120,7 +120,7 @@ class OpenViduSession(object):
                 parameters['kurentoOptions'] = kurento_options
 
             # send request
-            r = self._session.post('api/tokens', json=parameters)
+            r = self._session.post('tokens', json=parameters)
 
             if r.status_code == 404:
                 raise OpenViduSessionDoesNotExistsError()
@@ -190,7 +190,7 @@ class OpenViduSession(object):
             parameters = {k: v for k, v in parameters.items() if v is not None}
 
             # send request
-            r = self._session.post('api/signal', json=parameters)
+            r = self._session.post('signal', json=parameters)
 
             if r.status_code == 404:
                 raise OpenViduSessionDoesNotExistsError()
@@ -230,7 +230,7 @@ class OpenViduSession(object):
                 "data": data
             }
 
-            r = self._session.post(f'api/sessions/{self.id}/connection', json=parameters)
+            r = self._session.post(f'sessions/{self.id}/connection', json=parameters)
 
             if r.status_code == 404:
                 raise OpenViduSessionDoesNotExistsError()
