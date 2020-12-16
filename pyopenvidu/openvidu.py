@@ -158,9 +158,13 @@ class OpenVidu(object):
         Unlike session related calls. This call does not require prior calling of the fetch() method.
         Using this function will always result an API call to the backend.
 
-        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#get-config
+        https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#get-openviduapiconfig
 
         :return: The exact response from the server as a dict.
+        """
+        """
+        Note: Since 2.16.0 This endpoint is moved from toplevel under /api
+        https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#get-openviduapiconfig
         """
         r = self._session.get('config')
         r.raise_for_status()
