@@ -7,7 +7,7 @@ from pyopenvidu import OpenVidu
 from urllib.parse import urljoin
 from datetime import datetime
 
-URL_BASE = 'http://test.openvidu.io:4443/'
+URL_BASE = 'http://test.openvidu.io:4443/openvidu/api/'
 SESSIONS = {"numberOfElements": 2, "content": [
     {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED", "recordingMode": "MANUAL",
      "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT", "customSessionId": "TestSession",
@@ -72,9 +72,9 @@ SECRET = 'MY_SECRET'
 
 @pytest.fixture
 def openvidu_instance(requests_mock):
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=SESSIONS)
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=SESSIONS['content'][0])
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession2'), json=SESSIONS['content'][1])
+    requests_mock.get(urljoin(URL_BASE, 'sessions'), json=SESSIONS)
+    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json=SESSIONS['content'][0])
+    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession2'), json=SESSIONS['content'][1])
     yield OpenVidu(URL_BASE, SECRET)
 
 

@@ -8,7 +8,7 @@ from pyopenvidu import OpenVidu, OpenViduStreamDoesNotExistsError, OpenViduSessi
 from urllib.parse import urljoin
 from datetime import datetime
 
-URL_BASE = 'http://test.openvidu.io:4443/'
+URL_BASE = 'http://test.openvidu.io:4443/openvidu/api/'
 SESSIONS = {"numberOfElements": 2, "content": [
     {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED", "recordingMode": "MANUAL",
      "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT", "customSessionId": "TestSession",
@@ -73,9 +73,9 @@ SECRET = 'MY_SECRET'
 
 @pytest.fixture
 def openvidu_instance(requests_mock):
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=SESSIONS)
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=SESSIONS['content'][0])
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession2'), json=SESSIONS['content'][1])
+    requests_mock.get(urljoin(URL_BASE, 'sessions'), json=SESSIONS)
+    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json=SESSIONS['content'][0])
+    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession2'), json=SESSIONS['content'][1])
     yield OpenVidu(URL_BASE, SECRET)
 
 
@@ -94,7 +94,7 @@ def connection_instance(session_instance):
 #
 
 def test_unpublish(connection_instance, requests_mock):
-    a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
                              json={},
                              status_code=204)
 
@@ -104,7 +104,7 @@ def test_unpublish(connection_instance, requests_mock):
 
 
 def test_unpublish_no_publisher(connection_instance, requests_mock):
-    a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
                              json={},
                              status_code=404)
 
@@ -115,7 +115,7 @@ def test_unpublish_no_publisher(connection_instance, requests_mock):
 
 
 def test_unpublish_no_session(connection_instance, requests_mock):
-    a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
                              json={},
                              status_code=400)
 
@@ -126,7 +126,7 @@ def test_unpublish_no_session(connection_instance, requests_mock):
 
 
 def test_unpublish_ipcam(connection_instance, requests_mock):
-    a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession/stream/vhdxz7abbfirh2lh_CAMERA_CLVAU'),
                              json={},
                              status_code=405)
 

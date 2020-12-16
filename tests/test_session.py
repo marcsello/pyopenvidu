@@ -8,7 +8,7 @@ from pyopenvidu import OpenVidu, OpenViduError, OpenViduSessionDoesNotExistsErro
 from urllib.parse import urljoin
 from copy import deepcopy
 
-URL_BASE = 'http://test.openvidu.io:4443/'
+URL_BASE = 'http://test.openvidu.io:4443/openvidu/api/'
 SESSIONS = {"numberOfElements": 2, "content": [
     {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED", "recordingMode": "MANUAL",
      "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT", "customSessionId": "TestSession",
@@ -73,9 +73,9 @@ SECRET = 'MY_SECRET'
 
 @pytest.fixture
 def openvidu_instance(requests_mock):
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=SESSIONS)
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=SESSIONS['content'][0])
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession2'), json=SESSIONS['content'][1])
+    requests_mock.get(urljoin(URL_BASE, 'sessions'), json=SESSIONS)
+    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json=SESSIONS['content'][0])
+    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession2'), json=SESSIONS['content'][1])
     yield OpenVidu(URL_BASE, SECRET)
 
 
@@ -95,7 +95,7 @@ def test_session_token(session_instance, requests_mock):
         "token": "wss://localhost:4443?sessionId=zfgmthb8jl9uellk&token=lnlrtnkwm4v8l7uc&role=PUBLISHER&turnUsername=FYYNRC&turnCredential=yfxxs3",
         "kurentoOptions": {"videoMaxSendBandwidth": 700, "allowedFilters": ["GStreamerFilter", "ZBarFilter"]}}
 
-    adapter = requests_mock.post(urljoin(URL_BASE, 'api/tokens'), json=token_response)
+    adapter = requests_mock.post(urljoin(URL_BASE, 'tokens'), json=token_response)
 
     token = session_instance.generate_token()
 
@@ -110,7 +110,7 @@ def test_session_token_extra(session_instance, requests_mock):
         "token": "wss://localhost:4443?sessionId=zfgmthb8jl9uellk&token=lnlrtnkwm4v8l7uc&role=PUBLISHER&turnUsername=FYYNRC&turnCredential=yfxxs3",
         "kurentoOptions": {"videoMaxSendBandwidth": 700, "allowedFilters": ["GStreamerFilter", "ZBarFilter"]}}
 
-    adapter = requests_mock.post(urljoin(URL_BASE, 'api/tokens'), json=token_response)
+    adapter = requests_mock.post(urljoin(URL_BASE, 'tokens'), json=token_response)
 
     token = session_instance.generate_token(role='MODERATOR', data="meme machine", video_max_send_bandwidth=2500)
 
@@ -136,14 +136,14 @@ def test_token_invalid_session_early(session_instance):
 
 
 def test_session_token_missing_session(session_instance, requests_mock):
-    requests_mock.post(urljoin(URL_BASE, 'api/tokens'), json={}, status_code=404)
+    requests_mock.post(urljoin(URL_BASE, 'tokens'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.generate_token()
 
 
 def test_session_token_serverside_validation_error(session_instance, requests_mock):
-    requests_mock.post(urljoin(URL_BASE, 'api/tokens'), json={}, status_code=400)
+    requests_mock.post(urljoin(URL_BASE, 'tokens'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
         session_instance.generate_token()
@@ -155,7 +155,7 @@ def test_session_token_serverside_validation_error(session_instance, requests_mo
 
 
 def test_session_close(session_instance, requests_mock):
-    adapter = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession'), status_code=204)
+    adapter = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession'), status_code=204)
 
     session_instance.close()
 
@@ -164,7 +164,7 @@ def test_session_close(session_instance, requests_mock):
 
 
 def test_session_close_missing(session_instance, requests_mock):
-    requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession'), status_code=404)
+    requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession'), status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.close()
@@ -228,7 +228,7 @@ def test_connections_count_invalid_session_early(session_instance):
 #
 
 def test_signal_basic(session_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/signal'), status_code=200)
+    a = requests_mock.post(urljoin(URL_BASE, 'signal'), status_code=200)
 
     session_instance.signal('MY_TYPE', "Hello world!")
 
@@ -240,7 +240,7 @@ def test_signal_basic(session_instance, requests_mock):
 
 
 def test_signal_extra(session_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/signal'), status_code=200)
+    a = requests_mock.post(urljoin(URL_BASE, 'signal'), status_code=200)
     connections = list(session_instance.connections)
 
     session_instance.signal('MY_TYPE', "Hello world!", connections)
@@ -254,14 +254,14 @@ def test_signal_extra(session_instance, requests_mock):
 
 
 def test_signal_value_error(session_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/signal'), status_code=400)
+    a = requests_mock.post(urljoin(URL_BASE, 'signal'), status_code=400)
 
     with pytest.raises(ValueError):
         session_instance.signal('MY_TYPE', "Hello world!")
 
 
 def test_signal_no_session(session_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/signal'), status_code=404)
+    a = requests_mock.post(urljoin(URL_BASE, 'signal'), status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
@@ -270,8 +270,8 @@ def test_signal_no_session(session_instance, requests_mock):
 
 
 def test_signal_early_no_session(session_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/signal'), status_code=404)
-    b = requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json={}, status_code=404)
+    a = requests_mock.post(urljoin(URL_BASE, 'signal'), status_code=404)
+    b = requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.fetch()
@@ -285,7 +285,7 @@ def test_signal_early_no_session(session_instance, requests_mock):
 
 
 def test_signal_no_connection(session_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/signal'), status_code=406)
+    a = requests_mock.post(urljoin(URL_BASE, 'signal'), status_code=406)
 
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
@@ -325,7 +325,7 @@ def test_publish_simple(session_instance, requests_mock):
         "subscribers": []
     }
 
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json=new_connection_data)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
 
     new_connection = session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
@@ -382,7 +382,7 @@ def test_publish_extra(session_instance, requests_mock):
         "subscribers": []
     }
 
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json=new_connection_data)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
 
     new_connection = session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp", "TEST_DATA",
                                               adaptive_bitrate=False)
@@ -418,7 +418,7 @@ def test_publish_invalid_session_fail_early(session_instance, requests_mock):
 
 
 def test_publish_invalid_session(session_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json={}, status_code=404)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
@@ -427,7 +427,7 @@ def test_publish_invalid_session(session_instance, requests_mock):
 
 
 def test_publish_value_error(session_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json={}, status_code=400)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
         session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
@@ -436,7 +436,7 @@ def test_publish_value_error(session_instance, requests_mock):
 
 
 def test_publish_server_error(session_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions/TestSession/connection'), json={}, status_code=500)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=500)
 
     with pytest.raises(OpenViduError):
         session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
@@ -455,7 +455,7 @@ def test_fetching_nothing_happened(session_instance):
 
 
 def test_fetching_session_became_invalid(session_instance, requests_mock):
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json={}, status_code=404)
+    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.fetch()
@@ -480,7 +480,7 @@ def test_fetching_changed(session_instance, requests_mock):
         "subscribers": []
     })
 
-    a = requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=original)
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json=original)
 
     is_changed = session_instance.fetch()
 
@@ -509,7 +509,7 @@ def test_fetching_changed_fetch_by_parent(openvidu_instance, session_instance, r
         "subscribers": []
     })
 
-    a = requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=original)
 
     is_changed = openvidu_instance.fetch()
 
