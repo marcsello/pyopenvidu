@@ -32,7 +32,7 @@ class OpenViduSession(object):
         :return: True if the OpenViduSession status has changed with respect to the server, False if not. This applies to any property or sub-property of the object
         """
         with self._lock:
-            r = self._session.get(f"api/sessions/{self.id}")
+            r = self._session.get(f"sessions/{self.id}")
 
             if r.status_code == 404:
                 self._data = {}

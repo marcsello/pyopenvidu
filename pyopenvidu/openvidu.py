@@ -47,7 +47,7 @@ class OpenVidu(object):
         :return: true if the Session status has changed with respect to the server, false if not. This applies to any property or sub-property of the object.
         """
         with self._lock:
-            r = self._session.get("api/sessions")
+            r = self._session.get("sessions")
             r.raise_for_status()
 
             current_data = [s._data for s in self._openvidu_sessions.values()]
