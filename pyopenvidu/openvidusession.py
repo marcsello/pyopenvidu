@@ -5,7 +5,7 @@ from threading import RLock
 from requests_toolbelt.sessions import BaseUrlSession
 
 from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError, OpenViduError
-from .openviduconnection import OpenViduConnection
+from .openviduconnection import OpenViduConnection, OpenViduWEBRTCConnection, OpenViduIPCAMConnection
 
 
 class OpenViduSession(object):
@@ -72,6 +72,14 @@ class OpenViduSession(object):
         with self._lock:
             return bool(self._data)
 
+    def __get_proper_connection_type(self, connection_info) -> OpenViduConnection:
+        if connection_info['type'] == 'WEBRTC':
+            return OpenViduWEBRTCConnection(self._session, connection_info)
+        elif connection_info['type'] == 'IPCAM':
+            return OpenViduIPCAMConnection(self._session, connection_info)
+        else:
+            raise RuntimeError("Unknown connection type")
+
     @property
     def connections(self) -> Iterator[OpenViduConnection]:
         """
@@ -84,7 +92,7 @@ class OpenViduSession(object):
                 raise OpenViduSessionDoesNotExistsError()
 
             for connection_info in self._data['connections']['content']:
-                yield OpenViduConnection(self._session, self.id, connection_info)
+                yield self.__get_proper_connection_type(connection_info)
 
     def get_connection(self, connection_id: str) -> OpenViduConnection:
         """
@@ -99,11 +107,12 @@ class OpenViduSession(object):
 
             for connection_info in self._data['connections']['content']:
                 if connection_info['connectionId'] == connection_id:
-                    return OpenViduConnection(self._session, self.id, connection_info)
+                    if connection_info['type'] == 'WEBRTC':
+                        return self.__get_proper_connection_type(connection_info)
 
             raise OpenViduConnectionDoesNotExistsError()
 
-    def signal(self, type_: str = None, data: str = None, to: List[OpenViduConnection] = None):
+    def signal(self, type_: str = None, data: str = None, to: List[OpenViduWEBRTCConnection] = None):
         """
         Sends a signal to all participants in the session or specific connections if the `to` property defined.
         OpenViduConnection objects also implement this method.
@@ -159,7 +168,7 @@ class OpenViduSession(object):
     def create_webrtc_connection(self, role: str = 'PUBLISHER', data: str = None, video_max_recv_bandwidth: int = None,
                                  video_min_recv_bandwidth: int = None, video_max_send_bandwidth: int = None,
                                  video_min_send_bandwidth: int = None,
-                                 allowed_filters: list = None) -> OpenViduConnection:
+                                 allowed_filters: list = None) -> OpenViduWEBRTCConnection:
         """
         Creates a new Connection object of WEBRTC (Regular user) type to the session.
 
@@ -209,10 +218,10 @@ class OpenViduSession(object):
 
             response = self.__create_connection(parameters)
 
-            return OpenViduConnection(self._session, self.id, response)
+            return OpenViduWEBRTCConnection(self._session, response)
 
     def create_ipcam_connection(self, rtsp_uri: str, data: str = '', adaptive_bitrate: bool = True,
-                                only_play_with_subscribers: bool = True) -> OpenViduConnection:
+                                only_play_with_subscribers: bool = True) -> OpenViduIPCAMConnection:
         """
         Publishes a new IPCAM rtsp stream to the session.
 
@@ -241,7 +250,7 @@ class OpenViduSession(object):
 
             response = self.__create_connection(parameters)
 
-            return OpenViduConnection(self._session, self.id, response)
+            return OpenViduIPCAMConnection(self._session, response)
 
     @property
     def connection_count(self) -> int:
