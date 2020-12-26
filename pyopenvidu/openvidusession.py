@@ -72,63 +72,6 @@ class OpenViduSession(object):
         with self._lock:
             return bool(self._data)
 
-    def generate_token(self, role: str = 'PUBLISHER', data: str = None, video_max_recv_bandwidth: int = None,
-                       video_min_recv_bandwidth: int = None, video_max_send_bandwidth: int = None,
-                       video_min_send_bandwidth: int = None, allowed_filters: list = None) -> str:
-        """
-        Gets a new token associated to Session.
-
-        In the video bandwidth settings 0 means unconstrained. Setting any of them (other than None) overrides the values configured in for the server.
-
-        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apitokens
-
-        :param role: Allowed values: `SUBSCRIBER`, `PUBLISHER` or `MODERATOR`
-        :param data: metadata associated to this token (usually participant's information)
-        :param video_max_recv_bandwidth: Maximum number of Kbps that the client owning the token will be able to receive from Kurento Media Server.
-        :param video_min_recv_bandwidth: Minimum number of Kbps that the client owning the token will try to receive from Kurento Media Server.
-        :param video_max_send_bandwidth: Maximum number of Kbps that the client owning the token will be able to send to Kurento Media Server.
-        :param video_min_send_bandwidth: Minimum number of Kbps that the client owning the token will try to send to Kurento Media Server.
-        :param allowed_filters: Array of strings containing the names of the filters the user owning the token will be able to apply.
-        :return: The token as String.
-        """
-        with self._lock:
-
-            if not self._data:  # Fail early... and always
-                raise OpenViduSessionDoesNotExistsError()
-
-            # Prepare parameters
-
-            if role not in ['SUBSCRIBER', 'PUBLISHER', 'MODERATOR']:
-                raise ValueError(f"Role must be any of SUBSCRIBER, PUBLISHER or MODERATOR, not {role}")
-
-            parameters = {"session": self.id, "role": role}
-
-            if data:
-                parameters['data'] = data
-
-            kurento_options = {
-                "videoMaxRecvBandwidth": video_max_recv_bandwidth,
-                "videoMinRecvBandwidth": video_min_recv_bandwidth,
-                "videoMaxSendBandwidth": video_max_send_bandwidth,
-                "videoMinSendBandwidth": video_min_send_bandwidth,
-                "allowedFilters": allowed_filters
-            }
-
-            kurento_options = {k: v for k, v in kurento_options.items() if v is not None}
-
-            if kurento_options:
-                parameters['kurentoOptions'] = kurento_options
-
-            # send request
-            r = self._session.post('tokens', json=parameters)
-
-            if r.status_code == 404:
-                raise OpenViduSessionDoesNotExistsError()
-            elif r.status_code == 400:
-                raise ValueError()
-
-            return r.json()['token']
-
     @property
     def connections(self) -> Iterator[OpenViduConnection]:
         """
@@ -201,8 +144,75 @@ class OpenViduSession(object):
 
         r.raise_for_status()
 
-    def publish(self, rtsp_uri: str, data: str = '', adaptive_bitrate: bool = True,
-                only_play_with_subscribers: bool = True, type_: str = "IPCAM") -> OpenViduConnection:
+    def __create_connection(self, parameters: dict) -> dict:
+        r = self._session.post(f'sessions/{self.id}/connection', json=parameters)
+
+        if r.status_code == 404:
+            raise OpenViduSessionDoesNotExistsError()
+        elif r.status_code == 400:
+            raise ValueError()
+        elif r.status_code == 500:
+            raise OpenViduError(r.content)
+
+        return r.json()
+
+    def create_webrtc_connection(self, role: str = 'PUBLISHER', data: str = None, video_max_recv_bandwidth: int = None,
+                                 video_min_recv_bandwidth: int = None, video_max_send_bandwidth: int = None,
+                                 video_min_send_bandwidth: int = None,
+                                 allowed_filters: list = None) -> OpenViduConnection:
+        """
+        Creates a new Connection object of WEBRTC (Regular user) type to the session.
+
+        In the video bandwidth settings 0 means unconstrained. Setting any of them (other than None) overrides the values configured in for the server.
+
+        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apitokens
+
+        :param role: Allowed values: `SUBSCRIBER`, `PUBLISHER` or `MODERATOR`
+        :param data: metadata associated to this token (usually participant's information)
+        :param video_max_recv_bandwidth: Maximum number of Kbps that the client owning the token will be able to receive from Kurento Media Server.
+        :param video_min_recv_bandwidth: Minimum number of Kbps that the client owning the token will try to receive from Kurento Media Server.
+        :param video_max_send_bandwidth: Maximum number of Kbps that the client owning the token will be able to send to Kurento Media Server.
+        :param video_min_send_bandwidth: Minimum number of Kbps that the client owning the token will try to send to Kurento Media Server.
+        :param allowed_filters: Array of strings containing the names of the filters the user owning the token will be able to apply.
+        :return: An OpenVidu connection object represents the newly created connection.
+        """
+        with self._lock:
+
+            if not self._data:  # Fail early... and always
+                raise OpenViduSessionDoesNotExistsError()
+
+            # Prepare parameters
+
+            if role not in ['SUBSCRIBER', 'PUBLISHER', 'MODERATOR']:
+                raise ValueError(f"Role must be any of SUBSCRIBER, PUBLISHER or MODERATOR, not {role}")
+
+            parameters = {
+                "type": "WEBRTC",
+                "role": role
+            }
+
+            if data:
+                parameters['data'] = data
+
+            kurento_options = {
+                "videoMaxRecvBandwidth": video_max_recv_bandwidth,
+                "videoMinRecvBandwidth": video_min_recv_bandwidth,
+                "videoMaxSendBandwidth": video_max_send_bandwidth,
+                "videoMinSendBandwidth": video_min_send_bandwidth,
+                "allowedFilters": allowed_filters
+            }
+
+            kurento_options = {k: v for k, v in kurento_options.items() if v is not None}
+
+            if kurento_options:
+                parameters['kurentoOptions'] = kurento_options
+
+            response = self.__create_connection(parameters)
+
+            return OpenViduConnection(self._session, self.id, response)
+
+    def create_ipcam_connection(self, rtsp_uri: str, data: str = '', adaptive_bitrate: bool = True,
+                                only_play_with_subscribers: bool = True) -> OpenViduConnection:
         """
         Publishes a new IPCAM rtsp stream to the session.
 
@@ -215,7 +225,6 @@ class OpenViduSession(object):
         :param data: Metadata you want to associate to the camera's participant.
         :param adaptive_bitrate: Whether to use adaptive bitrate or not.
         :param only_play_with_subscribers: Enable the IP camera stream only when some user is subscribed to it.
-        :param type_: Which type of stream will be published. Defaults to `IPCAM`.
         :return: An OpenVidu connection object represents the newly created connection.
         """
         with self._lock:
@@ -223,23 +232,16 @@ class OpenViduSession(object):
                 raise OpenViduSessionDoesNotExistsError()
 
             parameters = {
-                "type": type_,
+                "type": "IPCAM",
                 "rtspUri": rtsp_uri,
                 "adaptativeBitrate": adaptive_bitrate,
                 "onlyPlayWithSubscribers": only_play_with_subscribers,
                 "data": data
             }
 
-            r = self._session.post(f'sessions/{self.id}/connection', json=parameters)
+            response = self.__create_connection(parameters)
 
-            if r.status_code == 404:
-                raise OpenViduSessionDoesNotExistsError()
-            elif r.status_code == 400:
-                raise ValueError()
-            elif r.status_code == 500:
-                raise OpenViduError(r.content)
-
-            return OpenViduConnection(self._session, self.id, r.json())
+            return OpenViduConnection(self._session, self.id, response)
 
     @property
     def connection_count(self) -> int:

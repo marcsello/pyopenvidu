@@ -97,7 +97,7 @@ def test_session_token(session_instance, requests_mock):
 
     adapter = requests_mock.post(urljoin(URL_BASE, 'tokens'), json=token_response)
 
-    token = session_instance.generate_token()
+    token = session_instance.create_webrtc_connection()
 
     assert token == token_response['token']
     assert adapter.last_request.json() == {'role': 'PUBLISHER', 'session': 'TestSession'}
@@ -112,7 +112,7 @@ def test_session_token_extra(session_instance, requests_mock):
 
     adapter = requests_mock.post(urljoin(URL_BASE, 'tokens'), json=token_response)
 
-    token = session_instance.generate_token(role='MODERATOR', data="meme machine", video_max_send_bandwidth=2500)
+    token = session_instance.create_webrtc_connection(role='MODERATOR', data="meme machine", video_max_send_bandwidth=2500)
 
     assert token == token_response['token']
     assert adapter.last_request.json() == {
@@ -125,28 +125,28 @@ def test_session_token_extra(session_instance, requests_mock):
 
 def test_session_token_validation_error(session_instance):
     with pytest.raises(ValueError):
-        session_instance.generate_token(role='abc')
+        session_instance.create_webrtc_connection(role='abc')
 
 
 def test_token_invalid_session_early(session_instance):
     session_instance._data = {}
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
-        session_instance.generate_token()
+        session_instance.create_webrtc_connection()
 
 
 def test_session_token_missing_session(session_instance, requests_mock):
     requests_mock.post(urljoin(URL_BASE, 'tokens'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
-        session_instance.generate_token()
+        session_instance.create_webrtc_connection()
 
 
 def test_session_token_serverside_validation_error(session_instance, requests_mock):
     requests_mock.post(urljoin(URL_BASE, 'tokens'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
-        session_instance.generate_token()
+        session_instance.create_webrtc_connection()
 
 
 #
@@ -327,7 +327,7 @@ def test_publish_simple(session_instance, requests_mock):
 
     a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
 
-    new_connection = session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
+    new_connection = session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
     assert a.last_request.json() == {
         "type": "IPCAM",
@@ -384,8 +384,8 @@ def test_publish_extra(session_instance, requests_mock):
 
     a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
 
-    new_connection = session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp", "TEST_DATA",
-                                              adaptive_bitrate=False)
+    new_connection = session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp", "TEST_DATA",
+                                                              adaptive_bitrate=False)
 
     assert a.last_request.json() == {
         "type": "IPCAM",
@@ -414,14 +414,14 @@ def test_publish_invalid_session_fail_early(session_instance, requests_mock):
     session_instance._data = {}
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
-        session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
+        session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
 
 def test_publish_invalid_session(session_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
-        session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
+        session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
     assert a.called
 
@@ -430,7 +430,7 @@ def test_publish_value_error(session_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
-        session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
+        session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
     assert a.called
 
@@ -439,7 +439,7 @@ def test_publish_server_error(session_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=500)
 
     with pytest.raises(OpenViduError):
-        session_instance.publish("rtsp://91.191.213.50:554/live_mpeg4.sdp")
+        session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
     assert a.called
 
