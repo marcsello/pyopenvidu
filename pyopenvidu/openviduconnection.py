@@ -20,6 +20,7 @@ class OpenViduConnection(object):
     server_data: Optional[str]
     publishers: List[OpenViduPublisher]
     subscribers: List[OpenViduSubscriber]
+    is_valid: bool
 
     def _update_from_data(self, data: dict):
         # set property
@@ -44,6 +45,7 @@ class OpenViduConnection(object):
         self.publishers = publishers
         self.subscribers = subscribers
 
+        self.is_valid = True
         # Specific properties will be set in the inherited functions
 
     def __init__(self, session: BaseUrlSession, data: dict):
@@ -54,6 +56,32 @@ class OpenViduConnection(object):
 
         self._session = session
         self._update_from_data(data)
+        self._last_fetch_result = data
+
+    def fetch(self) -> bool:
+
+        if not self.is_valid:
+            raise OpenViduConnectionDoesNotExistsError()
+
+        r = self._session.get(f"sessions/{self.session_id}/connection/{self.id}")
+
+        if r.status_code == 404:
+            self.is_valid = False
+            raise OpenViduConnectionDoesNotExistsError()
+        elif r.status_code == 400:
+            self.is_valid = False
+            raise OpenViduSessionDoesNotExistsError()
+
+        r.raise_for_status()
+        new_data = r.json()
+
+        is_changed = new_data != self._last_fetch_result
+
+        if is_changed:
+            self._update_from_data(new_data)
+            self._last_fetch_result = new_data
+
+        return is_changed
 
     def force_disconnect(self):
         """
@@ -62,10 +90,15 @@ class OpenViduConnection(object):
 
         https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#delete-apisessionsltsession_idgtconnectionltconnection_idgt
         """
+        if not self.is_valid:
+            raise OpenViduConnectionDoesNotExistsError()
+
         r = self._session.delete(f"sessions/{self.session_id}/connection/{self.id}")
         if r.status_code == 404:
+            self.is_valid = False
             raise OpenViduConnectionDoesNotExistsError()
         if r.status_code == 400:
+            self.is_valid = False
             raise OpenViduSessionDoesNotExistsError()
 
         r.raise_for_status()
@@ -79,6 +112,8 @@ class OpenViduConnection(object):
         :param type_: Type of the signal. In the body example of the table above, only users subscribed to Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal') will trigger signals of any type.
         :param data: Actual data of the signal.
         """
+        if not self.is_valid:
+            raise OpenViduConnectionDoesNotExistsError()
 
         parameters = {
             "session": self.session_id,
@@ -93,10 +128,13 @@ class OpenViduConnection(object):
         r = self._session.post('signal', json=parameters)
 
         if r.status_code == 404:
+            self.is_valid = False
             raise OpenViduSessionDoesNotExistsError()
         elif r.status_code == 400:
+            self.is_valid = False
             raise ValueError()
         elif r.status_code == 406:
+            self.is_valid = False
             raise OpenViduConnectionDoesNotExistsError()
 
         r.raise_for_status()
@@ -109,6 +147,9 @@ class OpenViduConnection(object):
 
         https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
         """
+        if not self.is_valid:
+            raise OpenViduConnectionDoesNotExistsError()
+
         for publisher in self.publishers:
             publisher.force_unpublish()
 
