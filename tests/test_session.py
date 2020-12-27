@@ -177,7 +177,6 @@ def test_session_close_missing(session_instance, requests_mock):
 #
 
 def test_connection_invalid_session_missing(session_instance):
-
     session_instance._data = {}
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
@@ -195,9 +194,7 @@ def test_missing_connection(session_instance):
         session_instance.get_connection('abc')
 
 
-
 def test_connection_invalid_session_early(session_instance):
-
     session_instance._data = {}
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
@@ -215,6 +212,7 @@ def test_connections(session_instance):
 
 def test_connections_count(session_instance):
     assert session_instance.connection_count == 3
+
 
 def test_connections_count_invalid_session_early(session_instance):
     session_instance._data = {}
@@ -492,7 +490,7 @@ def test_fetching_changed(session_instance, requests_mock):
     assert a.called
 
 
-def test_fetching_changed_fetch_by_parent(openvidu_instance, session_instance, requests_mock):
+def test_fetching_not_changed_fetch_by_parent(openvidu_instance, session_instance, requests_mock):
     original = deepcopy(SESSIONS)
     original['content'][0]['connections']['numberOfElements'] = 4
     original['content'][0]['connections']['content'].append({
@@ -513,9 +511,9 @@ def test_fetching_changed_fetch_by_parent(openvidu_instance, session_instance, r
 
     is_changed = openvidu_instance.fetch()
 
-    assert session_instance.connection_count == 4
-
-    assert list(session_instance.connections)[3].id == 'vhdxz7abbfirh3lh'
+    # Check against the original, not the modified one
+    assert session_instance.connection_count == SESSIONS['content'][0]['connections']['numberOfElements']
+    assert len(list(session_instance.connections)) == SESSIONS['content'][0]['connections']['numberOfElements']
 
     assert is_changed
     assert a.called

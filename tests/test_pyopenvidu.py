@@ -247,14 +247,21 @@ def test_fetching_deleted(openvidu_instance, requests_mock):
 
     original = {"numberOfElements": 0, "content": []}
     requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
+    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), status_code=404)
 
     is_changed = openvidu_instance.fetch()
 
-    assert not session_before_delete.is_valid
     assert is_changed
 
+    # The session should still report valid state, because it did not get fetched
+    assert session_before_delete.is_valid
+
     with pytest.raises(OpenViduSessionDoesNotExistsError):
+        # the api returns 404
         session_before_delete.fetch()
+
+    # Since fetch called, this session shouldn't be valid anymore
+    assert not session_before_delete.is_valid
 
 
 def test_access_after_close_without_fetch(openvidu_instance, requests_mock):
@@ -303,8 +310,10 @@ def test_fetching_changed(openvidu_instance, requests_mock):
 
     is_changed = openvidu_instance.fetch()
 
-    assert session_before_change.connection_count == 4
     assert is_changed
+
+    # fetch() was not called on the session object, so it should not change
+    assert session_before_change.connection_count == SESSIONS['content'][0]['connections']['numberOfElements']
 
 
 def test_fetching_new(openvidu_instance, requests_mock):
