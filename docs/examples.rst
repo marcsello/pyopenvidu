@@ -18,12 +18,12 @@ Generate a token a session::
 Fetch session information::
 
     # Fetch all session info from OpenVidu Server
-    openvidu.fetch():
-    sessions = openvidu.get_sessions();
+    openvidu.fetch()
+    sessions = openvidu.sessions  # sessions returns a list of OpenViduSession objects
 
     # Fetch a specific session info from the server
-    session.fetch();
-    connections = session.getActiveConnections();
+    session.fetch()
+    connections = session.connections
 
 
 Send signals::
