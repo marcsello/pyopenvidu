@@ -64,7 +64,7 @@ def test_unpublish_ipcam(connection_instance, requests_mock):
 def test_properties(connection_instance):
     p = connection_instance.publishers[0]
 
-    assert p.session_id == SESSIONS['content'][0]['sessionId']
+    assert p.session_id == SESSIONS['content'][0]['id']
     assert p.stream_id == SESSIONS['content'][0]['connections']['content'][0]['publishers'][0]['streamId']
 
     assert p.created_at == datetime.utcfromtimestamp(
@@ -73,21 +73,17 @@ def test_properties(connection_instance):
 
     assert p.media_options == SESSIONS['content'][0]['connections']['content'][0]['publishers'][0]['mediaOptions']
 
-    assert p.rtsp_uri is None
-
 
 def test_properties_ipcam(openvidu_instance):
     session_instance = openvidu_instance.get_session('TestSession2')
     connection_instance = session_instance.get_connection('ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp')
     p = connection_instance.publishers[0]
 
-    assert p.session_id == SESSIONS['content'][1]['sessionId']
-    assert p.stream_id == SESSIONS['content'][1]['connections']['content'][2]['publishers'][0]['streamId']
+    assert p.session_id == SESSIONS['content'][1]['id']
+    assert p.stream_id == SESSIONS['content'][1]['connections']['content'][0]['publishers'][0]['streamId']
 
     assert p.created_at == datetime.utcfromtimestamp(
-        SESSIONS['content'][1]['connections']['content'][2]['publishers'][0]['createdAt'] / 1000.0
+        SESSIONS['content'][1]['connections']['content'][0]['publishers'][0]['createdAt'] / 1000.0
     )
 
-    assert p.media_options == SESSIONS['content'][1]['connections']['content'][2]['publishers'][0]['mediaOptions']
-
-    assert p.rtsp_uri == SESSIONS['content'][1]['connections']['content'][2]['publishers'][0]['rtspUri']
+    assert p.media_options == SESSIONS['content'][1]['connections']['content'][0]['publishers'][0]['mediaOptions']

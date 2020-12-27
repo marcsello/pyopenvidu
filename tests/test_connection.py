@@ -47,10 +47,10 @@ def test_signal(connection_instance, requests_mock):
     connection_instance.signal('MY_TYPE', "Hello world!")
 
     assert a.last_request.json() == {
-        "session": SESSIONS['content'][0]['sessionId'],
+        "session": SESSIONS['content'][0]['id'],
         "type": "MY_TYPE",
         "data": "Hello world!",
-        "to": [SESSIONS['content'][0]['connections']['content'][0]['connectionId']]
+        "to": [SESSIONS['content'][0]['connections']['content'][0]['id']]
 
     }
 
@@ -97,8 +97,8 @@ def test_force_unpublish_all(connection_instance, requests_mock):
 #
 
 def test_properties(connection_instance):
-    assert connection_instance.session_id == SESSIONS['content'][0]['sessionId']
-    assert connection_instance.id == SESSIONS['content'][0]['connections']['content'][0]['connectionId']
+    assert connection_instance.session_id == SESSIONS['content'][0]['id']
+    assert connection_instance.id == SESSIONS['content'][0]['connections']['content'][0]['id']
 
     assert connection_instance.created_at == datetime.utcfromtimestamp(
         SESSIONS['content'][0]['connections']['content'][0]['createdAt'] / 1000.0
@@ -114,39 +114,36 @@ def test_properties(connection_instance):
 
 
 def test_properties_none_fields(session_instance):
-    connection_instance = session_instance.get_connection('maxawc4zsuj1rxva')
+    connection_instance = session_instance.get_connection(SESSIONS['content'][0]['connections']['content'][1]['id'])
 
-    assert connection_instance.session_id == SESSIONS['content'][0]['sessionId']
-    assert connection_instance.id == SESSIONS['content'][0]['connections']['content'][2]['connectionId']
+    assert connection_instance.session_id == SESSIONS['content'][0]['id']
+    assert connection_instance.id == SESSIONS['content'][0]['connections']['content'][1]['id']
 
     assert connection_instance.created_at == datetime.utcfromtimestamp(
-        SESSIONS['content'][0]['connections']['content'][2]['createdAt'] / 1000.0
+        SESSIONS['content'][0]['connections']['content'][0]['createdAt'] / 1000.0
     )
 
-    assert connection_instance.token == SESSIONS['content'][0]['connections']['content'][2]['token']
+    assert connection_instance.token == SESSIONS['content'][0]['connections']['content'][1]['token']
     assert connection_instance.client_data is None
     assert connection_instance.server_data is None
-    assert connection_instance.platform == SESSIONS['content'][0]['connections']['content'][2]['platform']
-    assert connection_instance.role == SESSIONS['content'][0]['connections']['content'][2]['role']
+    assert connection_instance.platform == SESSIONS['content'][0]['connections']['content'][1]['platform']
+    assert connection_instance.role == SESSIONS['content'][0]['connections']['content'][1]['role']
 
-    assert len(connection_instance.publishers) == len(SESSIONS['content'][0]['connections']['content'][2]['publishers'])
+    assert len(connection_instance.publishers) == len(SESSIONS['content'][0]['connections']['content'][1]['publishers'])
 
 
 def test_properties_ipcam_fields(openvidu_instance):
-    session_instance = openvidu_instance.get_session('TestSession2')
-    connection_instance = session_instance.get_connection('ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp')
+    session_instance = openvidu_instance.get_session(SESSIONS['content'][1]['id'])
+    connection_instance = session_instance.get_connection(SESSIONS['content'][1]['connections']['content'][0]['id'])
 
-    assert connection_instance.session_id == SESSIONS['content'][1]['sessionId']
-    assert connection_instance.id == SESSIONS['content'][1]['connections']['content'][2]['connectionId']
+    assert connection_instance.session_id == SESSIONS['content'][1]['id']
+    assert connection_instance.id == SESSIONS['content'][1]['connections']['content'][0]['id']
 
     assert connection_instance.created_at == datetime.utcfromtimestamp(
-        SESSIONS['content'][1]['connections']['content'][2]['createdAt'] / 1000.0
+        SESSIONS['content'][1]['connections']['content'][0]['createdAt'] / 1000.0
     )
 
-    assert connection_instance.token is None
-    assert connection_instance.client_data is None
-    assert connection_instance.server_data == SESSIONS['content'][1]['connections']['content'][2]['serverData']
-    assert connection_instance.platform == SESSIONS['content'][1]['connections']['content'][2]['platform']
-    assert connection_instance.role == SESSIONS['content'][1]['connections']['content'][2]['role']
+    assert connection_instance.server_data == SESSIONS['content'][1]['connections']['content'][0]['serverData']
+    assert connection_instance.platform == SESSIONS['content'][1]['connections']['content'][0]['platform']
 
-    assert len(connection_instance.publishers) == len(SESSIONS['content'][1]['connections']['content'][2]['publishers'])
+    assert len(connection_instance.publishers) == len(SESSIONS['content'][1]['connections']['content'][0]['publishers'])

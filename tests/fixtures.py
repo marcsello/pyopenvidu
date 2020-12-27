@@ -2,171 +2,188 @@ import pytest
 from urllib.parse import urljoin
 from pyopenvidu import OpenVidu
 
-URL_BASE = 'http://test.openvidu.io:4443/'
+URL_BASE = 'http://test.openvidu.io:4443/openvidu/api/'
 SECRET = 'MY_SECRET'
 
 SESSIONS = {
     "numberOfElements": 2,
     "content": [
         {
-            "sessionId": "TestSession",
-            "createdAt": 1538482606338,
+            "id": "TestSession",
+            "object": "session",
+            "createdAt": 1538481996019,
             "mediaMode": "ROUTED",
             "recordingMode": "MANUAL",
             "defaultOutputMode": "COMPOSED",
-            "defaultRecordingLayout": "BEST_FIT",
+            "defaultRecordingLayout": "CUSTOM",
+            "defaultCustomLayout": "",
             "customSessionId": "TestSession",
             "connections": {
-                "numberOfElements": 3,
+                "numberOfElements": 2,
                 "content": [
                     {
-                        "connectionId": "vhdxz7abbfirh2lh",
-                        "createdAt": 1538482606412,
+                        "id": "vhdxz7abbfirh2lh",
+                        "object": "connection",
+                        "type": "WEBRTC",
+                        "status": "active",
+                        "sessionId": "TestSession",
+                        "createdAt": 1538481999022,
+                        "activeAt": 1538481999843,
                         "location": "",
-                        "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-                        "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
+                        "platform": "Chrome 85.0.4183.102 on Linux 64-bit",
+                        "token": "wss://localhost:4443?sessionId=TestSession&token=tok_AVe8o7iltWqtijyl&role=PUBLISHER&version=2.16.0&coturnIp=localhost&turnUsername=M2ALIY&turnCredential=7kfjy2",
+                        "serverData": "My Server Data",
+                        "clientData": "My Client Data",
+                        "record": False,
                         "role": "PUBLISHER",
-                        "serverData": "",
-                        "clientData": "TestClient1",
-                        "publishers": [{
-                            "createdAt": 1538482606976,
-                            "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-                            "mediaOptions": {
-                                "hasAudio": True,
-                                "audioActive": True,
-                                "hasVideo": True,
-                                "videoActive": True,
-                                "typeOfVideo": "CAMERA",
-                                "frameRate": 30,
-                                "videoDimensions": "{\"width\":640,\"height\":480}",
-                                "filter": {}
+                        "kurentoOptions": {
+                            "videoMaxRecvBandwidth": 1000,
+                            "videoMinRecvBandwidth": 300,
+                            "videoMaxSendBandwidth": 1000,
+                            "videoMinSendBandwidth": 300,
+                            "allowedFilters": [
+                                "GStreamerFilter",
+                                "ZBarFilter"
+                            ]
+                        },
+                        "publishers": [
+                            {
+                                "createdAt": 1538481999710,
+                                "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                                "mediaOptions": {
+                                    "hasAudio": True,
+                                    "audioActive": True,
+                                    "hasVideo": True,
+                                    "videoActive": True,
+                                    "typeOfVideo": "CAMERA",
+                                    "frameRate": 30,
+                                    "videoDimensions": "{\"width\":640,\"height\":480}",
+                                    "filter": {}
+                                }
                             }
-                        }],
-                        "subscribers": [{
-                            "createdAt": 1538482627799,
-                            "streamId": "vhdxz7abbfsrh2lh_CAMERA_CLVAU"
-                        }]
+                        ],
+                        "subscribers": [
+                            {
+                                "streamId": "str_CAM_NhxL_con_Xnasd9tonh",
+                                "createdAt": 1538482000856
+                            }
+                        ]
                     },
                     {
-                        "connectionId": "maxawd3ysuj1rxvq",
-                        "createdAt": 1538482607659,
+                        "id": "maxawc4zsuj1rxva",
+                        "object": "connection",
+                        "type": "WEBRTC",
+                        "status": "active",
+                        "sessionId": "TestSession",
+                        "createdAt": 1538481999022,
+                        "activeAt": 1538481999843,
                         "location": "",
-                        "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-                        "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
+                        "platform": "Chrome 69.0.4183.102 on Linux 64-bit",
+                        "token": "wss://localhost:4443?sessionId=TestSession&token=tok_AVe8o7iltWqtijyl&role=PUBLISHER&version=2.16.0&coturnIp=localhost&turnUsername=M2ALIY&turnCredential=7kfjy2",
+                        "serverData": None,
+                        "clientData": None,
+                        "record": False,
                         "role": "PUBLISHER",
-                        "serverData": "",
-                        "clientData": "TestClient2",
-                        "publishers": [],
-                        "subscribers": [{
-                            "createdAt": 1538482607799,
-                            "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"
-                        }]
-                    },
-                    {
-                        "connectionId": "maxawc4zsuj1rxva",
-                        "createdAt": 1538482607659,
-                        "location": "",
-                        "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-                        "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
-                        "role": "PUBLISHER",
-                        "publishers": [],
-                        "subscribers": [{
-                            "createdAt": 1538482607799,
-                            "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"
-                        }]
-                    },
+                        "kurentoOptions": {
+                            "videoMaxRecvBandwidth": 1000,
+                            "videoMinRecvBandwidth": 300,
+                            "videoMaxSendBandwidth": 1000,
+                            "videoMinSendBandwidth": 300,
+                            "allowedFilters": [
+                                "GStreamerFilter",
+                                "ZBarFilter"
+                            ]
+                        },
+                        "publishers": [
+                            {
+                                "createdAt": 1538481999710,
+                                "streamId": "str_CAM_NhxL_con_Xnasd9tonh",
+                                "mediaOptions": {
+                                    "hasAudio": True,
+                                    "audioActive": True,
+                                    "hasVideo": True,
+                                    "videoActive": True,
+                                    "typeOfVideo": "CAMERA",
+                                    "frameRate": 30,
+                                    "videoDimensions": "{\"width\":640,\"height\":480}",
+                                    "filter": {}
+                                }
+                            }
+                        ],
+                        "subscribers": [
+                            {
+                                "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
+                                "createdAt": 1538482000856
+                            }
+                        ]
+                    }
+
                 ]
             },
             "recording": False
         },
         {
-            "sessionId": "TestSession2",
-            "createdAt": 1538482606338,
+            "id": "TestSession2",
+            "object": "session",
+            "createdAt": 1538481996020,
             "mediaMode": "ROUTED",
-            "recordingMode": "MANUAL",
+            "recordingMode": "ALWAYS",
             "defaultOutputMode": "COMPOSED",
-            "defaultRecordingLayout": "BEST_FIT",
-            "customSessionId": "TestSession",
+            "defaultRecordingLayout": "CUSTOM",
+            "defaultCustomLayout": "",
+            "customSessionId": "TestSession2",
             "connections": {
-                "numberOfElements": 3,
+                "numberOfElements": 1,
                 "content": [
                     {
-                        "connectionId": "vhdxz7abbfirh2lh",
-                        "createdAt": 1538482606412,
+                        "id": "ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp",
+                        "object": "connection",
+                        "type": "IPCAM",
+                        "status": "active",
+                        "sessionId": "TestSession2",
+                        "createdAt": 1538481919022,
+                        "activeAt": 1538481009843,
                         "location": "",
-                        "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-                        "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
-                        "role": "PUBLISHER",
-                        "serverData": "",
-                        "clientData": "TestClient1",
-                        "publishers": [{
-                            "createdAt": 1538482606976,
-                            "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-                            "mediaOptions": {
-                                "hasAudio": True,
-                                "audioActive": True,
-                                "hasVideo": True,
-                                "videoActive": True,
-                                "typeOfVideo": "CAMERA",
-                                "frameRate": 30,
-                                "videoDimensions": "{\"width\":640,\"height\":480}",
-                                "filter": {}
-                            }
-                        }],
-                        "subscribers": []
-                    },
-                    {
-                        "connectionId": "maxawd3ysuj1rxvq",
-                        "createdAt": 1538482607659,
-                        "location": "",
-                        "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-                        "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
-                        "role": "PUBLISHER",
-                        "serverData": "",
-                        "clientData": "TestClient2",
-                        "publishers": [],
-                        "subscribers": [{
-                            "createdAt": 1538482607799,
-                            "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"
-                        }]
-                    },
-                    {
-                        "connectionId": "ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp",
-                        "createdAt": 1582121476379,
-                        "location": "unknown",
                         "platform": "IPCAM",
-                        "role": "PUBLISHER",
-                        "serverData": "MY_IP_CAMERA",
-                        "publishers": [{
-                            "createdAt": 1582121476439,
-                            "streamId": "str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp",
-                            "rtspUri": "rtsp://91.191.213.49:554/live_mpeg4.sdp",
-                            "mediaOptions": {
-                                "hasAudio": True,
-                                "audioActive": True,
-                                "hasVideo": True,
-                                "videoActive": True,
-                                "typeOfVideo": "IPCAM",
-                                "frameRate": None,
-                                "videoDimensions": None,
-                                "filter": {},
-                                "adaptativeBitrate": True,
-                                "onlyPlayWithSubscribers": True
-                            }}],
+                        "token": None,
+                        "serverData": "My Server Data",
+                        "clientData": "My Client Data",
+                        "record": True,
+                        "rtspUri": "rtsp://user:pass@example.com",
+                        "adaptativeBitrate": True,
+                        "onlyPlayWithSubscribers": False,
+                        "networkCache": 2000,
+                        "publishers": [
+                            {
+                                "createdAt": 1538481999711,
+                                "streamId": "str_CAM_NhxL_con_Xnxg123qnh",
+                                "mediaOptions": {
+                                    "hasAudio": False,
+                                    "audioActive": False,
+                                    "hasVideo": True,
+                                    "videoActive": True,
+                                    "typeOfVideo": "CAMERA",
+                                    "frameRate": 15,
+                                    "videoDimensions": "{\"width\":640,\"height\":480}",
+                                    "filter": {}
+                                }
+                            }
+                        ],
                         "subscribers": []
                     }
+
                 ]
             },
-            "recording": False
+            "recording": True
         }
     ]}
 
 
 @pytest.fixture
 def openvidu_instance(requests_mock):
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=SESSIONS)
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession'), json=SESSIONS['content'][0])
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions/TestSession2'), json=SESSIONS['content'][1])
+    requests_mock.get(urljoin(URL_BASE, 'sessions'), json=SESSIONS)
+    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json=SESSIONS['content'][0])
+    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession2'), json=SESSIONS['content'][1])
     yield OpenVidu(URL_BASE, SECRET)
 
 
