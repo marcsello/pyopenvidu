@@ -36,7 +36,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9'
     ],
-    description="Python interface to the OpenVidu WebRTC videoconverence library.",
+    description="Python interface to the OpenVidu WebRTC videoconference library.",
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,

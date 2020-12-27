@@ -37,6 +37,7 @@ class OpenVidu(object):
 
         self._openvidu_sessions = {}  # id:object
 
+        self._last_fetch_result = {}  # Used only to calculate the return value of the fetch() call
         if initial_fetch:
             self.fetch()  # initial fetch
 
@@ -49,34 +50,20 @@ class OpenVidu(object):
         with self._lock:
             r = self._session.get("sessions")
             r.raise_for_status()
-
-            current_data = [s._data for s in self._openvidu_sessions.values()]
             new_data = r.json()['content']
 
-            is_changed = current_data != new_data
+            data_changed = new_data != self._last_fetch_result
+            self._last_fetch_result = new_data
 
-            if is_changed:
+            if data_changed:
+                self._openvidu_sessions = {}
+
                 # update, create valid streams
-                valid_sessions = []
                 for session_data in new_data:
                     session_id = session_data['sessionId']
-                    valid_sessions.append(session_id)
+                    self._openvidu_sessions[session_id] = OpenViduSession(self._session, self._lock, session_data)
 
-                    if session_id in self._openvidu_sessions.keys():
-                        # Update is important, because the reference must be the same
-                        self._openvidu_sessions[session_id]._data = session_data
-                    else:
-                        self._openvidu_sessions[session_id] = OpenViduSession(self._session, self._lock, session_data)
-
-                # reset data of invalid streams
-                for session_id, session in self._openvidu_sessions.items():
-                    if session_id not in valid_sessions:
-                        session._data = {}
-
-                # remove invalid sessions from list
-                self._openvidu_sessions = {k: v for k, v in self._openvidu_sessions.items() if k in valid_sessions}
-
-            return is_changed
+            return data_changed
 
     def get_session(self, session_id: str) -> OpenViduSession:
         """
