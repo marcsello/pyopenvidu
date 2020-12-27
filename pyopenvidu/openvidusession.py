@@ -1,5 +1,6 @@
 """OpenViduSession class."""
-from typing import Iterator, List
+from typing import List, Optional
+from dataclasses import dataclass
 from datetime import datetime
 from threading import RLock
 from requests_toolbelt.sessions import BaseUrlSession
@@ -8,11 +9,41 @@ from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduConnectionDoe
 from .openviduconnection import OpenViduConnection, OpenViduWEBRTCConnection, OpenViduIPCAMConnection
 
 
+@dataclass(frozen=False, init=False)
 class OpenViduSession(object):
     """
     This object represents an OpenVidu Session.
     A session is a group of users sharing communicating each other.
     """
+
+    id: str
+    created_at: datetime
+    is_being_recorded: bool
+    media_mode: str
+    connections: List[OpenViduConnection]
+    is_valid: bool
+
+    def __get_proper_connection_type(self, connection_info) -> OpenViduConnection:
+        if connection_info['type'] == 'WEBRTC':
+            return OpenViduWEBRTCConnection(self._session, connection_info)
+        elif connection_info['type'] == 'IPCAM':
+            return OpenViduIPCAMConnection(self._session, connection_info)
+        else:
+            raise RuntimeError("Unknown connection type")
+
+    def __update_from_data(self, data: dict):
+        self.id = data['sessionId']
+        self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)
+        self.is_being_recorded = data['recording']
+        self.media_mode = data['mediaMode']
+
+        connections = []
+        for connection_info in data['connections']['content']:
+            connections.append(
+                self.__get_proper_connection_type(connection_info)
+            )
+        self.connections = connections
+        self.is_valid = True
 
     def __init__(self, session: BaseUrlSession, data: dict):
         """
@@ -21,8 +52,11 @@ class OpenViduSession(object):
         """
 
         self._session = session
-        self._data = data
+
         self._lock = RLock()
+
+        self.__update_from_data(data)
+        self._last_fetch_result = data
 
     def fetch(self):
         """
@@ -35,15 +69,17 @@ class OpenViduSession(object):
             r = self._session.get(f"sessions/{self.id}")
 
             if r.status_code == 404:
-                self._data = {}
+                self.is_valid = False
                 raise OpenViduSessionDoesNotExistsError()
 
             r.raise_for_status()
 
-            is_changed = self._data != r.json()
+            new_data = r.json()
+            is_changed = self._last_fetch_result != new_data
 
             if is_changed:
-                self._data = r.json()
+                self.__update_from_data(r.json())
+                self._last_fetch_result = new_data
 
             return is_changed
 
@@ -56,43 +92,11 @@ class OpenViduSession(object):
             r = self._session.delete(f"sessions/{self.id}")
 
             if r.status_code == 404:
-                self._data = {}
+                self.is_valid = False
                 raise OpenViduSessionDoesNotExistsError()
 
             r.raise_for_status()
-            self._data = {}
-
-    @property
-    def is_valid(self) -> bool:
-        """
-        Checks if this session still existed on the server by the last call to fetch().
-
-        :return: True if the session exists. False otherwise.
-        """
-        with self._lock:
-            return bool(self._data)
-
-    def __get_proper_connection_type(self, connection_info) -> OpenViduConnection:
-        if connection_info['type'] == 'WEBRTC':
-            return OpenViduWEBRTCConnection(self._session, connection_info)
-        elif connection_info['type'] == 'IPCAM':
-            return OpenViduIPCAMConnection(self._session, connection_info)
-        else:
-            raise RuntimeError("Unknown connection type")
-
-    @property
-    def connections(self) -> Iterator[OpenViduConnection]:
-        """
-        Returns the list of active connections to the session.
-
-        :return: A generator for OpenViduConnection objects.
-        """
-        with self._lock:
-            if not self._data:
-                raise OpenViduSessionDoesNotExistsError()
-
-            for connection_info in self._data['connections']['content']:
-                yield self.__get_proper_connection_type(connection_info)
+            self.is_valid = False
 
     def get_connection(self, connection_id: str) -> OpenViduConnection:
         """
@@ -102,17 +106,16 @@ class OpenViduSession(object):
         :return: A OpenViduConnection objects.
         """
         with self._lock:
-            if not self._data:
+            if not self.is_valid:
                 raise OpenViduSessionDoesNotExistsError()
 
-            for connection_info in self._data['connections']['content']:
-                if connection_info['connectionId'] == connection_id:
-                    if connection_info['type'] == 'WEBRTC':
-                        return self.__get_proper_connection_type(connection_info)
+            for connection in self.connections:
+                if connection.id == connection_id:
+                    return connection
 
             raise OpenViduConnectionDoesNotExistsError()
 
-    def signal(self, type_: str = None, data: str = None, to: List[OpenViduWEBRTCConnection] = None):
+    def signal(self, type_: str = None, data: str = None, to: Optional[List[OpenViduConnection]] = None):
         """
         Sends a signal to all participants in the session or specific connections if the `to` property defined.
         OpenViduConnection objects also implement this method.
@@ -124,7 +127,7 @@ class OpenViduSession(object):
         :param to: List of OpenViduConnection objects to which you want to send the signal. If this property is not set (None) the signal will be sent to all participants of the session.
         """
         with self._lock:
-            if not self._data:  # Fail early... and always
+            if not self.is_valid:  # Fail early... and always
                 raise OpenViduSessionDoesNotExistsError()
 
             if to:
@@ -187,7 +190,7 @@ class OpenViduSession(object):
         """
         with self._lock:
 
-            if not self._data:  # Fail early... and always
+            if not self.is_valid:  # Fail early... and always
                 raise OpenViduSessionDoesNotExistsError()
 
             # Prepare parameters
@@ -217,8 +220,9 @@ class OpenViduSession(object):
                 parameters['kurentoOptions'] = kurento_options
 
             response = self.__create_connection(parameters)
-
-            return OpenViduWEBRTCConnection(self._session, response)
+            new_connection = OpenViduWEBRTCConnection(self._session, response)
+            self.connections.append(new_connection)
+            return new_connection
 
     def create_ipcam_connection(self, rtsp_uri: str, data: str = '', adaptive_bitrate: bool = True,
                                 only_play_with_subscribers: bool = True) -> OpenViduIPCAMConnection:
@@ -237,7 +241,7 @@ class OpenViduSession(object):
         :return: An OpenVidu connection object represents the newly created connection.
         """
         with self._lock:
-            if not self._data:  # Fail early... and always
+            if not self.is_valid:  # Fail early... and always
                 raise OpenViduSessionDoesNotExistsError()
 
             parameters = {
@@ -249,8 +253,9 @@ class OpenViduSession(object):
             }
 
             response = self.__create_connection(parameters)
-
-            return OpenViduIPCAMConnection(self._session, response)
+            new_connection = OpenViduIPCAMConnection(self._session, response)
+            self.connections.append(new_connection)
+            return new_connection
 
     @property
     def connection_count(self) -> int:
@@ -260,42 +265,7 @@ class OpenViduSession(object):
         :return: The number of active connections.
         """
         with self._lock:
-            if not self._data:
+            if not self.is_valid:
                 raise OpenViduSessionDoesNotExistsError()
 
-            return self._data['connections']['numberOfElements']
-
-    @property
-    def id(self) -> str:
-        """
-        :return: The ID of this session.
-        """
-        with self._lock:
-            if not self._data:
-                raise OpenViduSessionDoesNotExistsError()
-
-            return self._data['sessionId']
-
-    @property
-    def created_at(self) -> datetime:
-        """
-        :return: datetime object when the session was created in UTC time.
-        """
-        with self._lock:
-            return datetime.utcfromtimestamp(self._data['createdAt'] / 1000.0)
-
-    @property
-    def is_being_recorded(self) -> bool:
-        """
-        :return: True if the session is being recorded. False otherwise.
-        """
-        with self._lock:
-            return self._data['recording']
-
-    @property
-    def media_mode(self) -> str:
-        """
-        :return: Media mode configured for the session ('ROUTED' or 'RELAYED').
-        """
-        with self._lock:
-            return self._data['mediaMode']
+            return len(self.connections)
