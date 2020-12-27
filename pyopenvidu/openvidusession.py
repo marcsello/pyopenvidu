@@ -14,7 +14,7 @@ class OpenViduSession(object):
     A session is a group of users sharing communicating each other.
     """
 
-    def __init__(self, session: BaseUrlSession, lock: RLock, data: dict):
+    def __init__(self, session: BaseUrlSession, data: dict):
         """
         This is meant for internal use, thus you should not call it.
         Use `OpenVidu.get_session` to get an instance of this class.
@@ -22,7 +22,7 @@ class OpenViduSession(object):
 
         self._session = session
         self._data = data
-        self._lock = lock  # Sadly using this lock locks all other session objects as well
+        self._lock = RLock()
 
     def fetch(self):
         """
