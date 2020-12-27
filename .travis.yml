@@ -30,3 +30,8 @@ deploy:
     tags: true
     repo: marcsello/pyopenvidu
     python: 3.8
+
+branches:
+  only:
+  - master
+  - dev
