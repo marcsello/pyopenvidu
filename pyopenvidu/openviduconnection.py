@@ -21,14 +21,7 @@ class OpenViduConnection(object):
     publishers: List[OpenViduPublisher]
     subscribers: List[OpenViduSubscriber]
 
-    def __init__(self, session: BaseUrlSession, data: dict):
-        """
-        This is meant for internal use, thus you should not call it.
-        Use `OpenViduSession.connections` to get an instance of this class.
-        """
-
-        self._session = session
-
+    def _update_from_data(self, data: dict):
         # set property
         self.id = data['connectionId']
         self.type = data['type']  # Either IPCAM or WEBRTC
@@ -41,15 +34,26 @@ class OpenViduConnection(object):
         # set publishers
         publishers = []
         for publisher_data in data['publishers']:
-            publishers.append(OpenViduPublisher(session, self.session_id, publisher_data))
+            publishers.append(OpenViduPublisher(self._session, self.session_id, publisher_data))
 
         # set subscribers
         subscribers = []
         for subscriber_data in data['subscribers']:
-            subscribers.append(OpenViduSubscriber(session, self.session_id, subscriber_data))
+            subscribers.append(OpenViduSubscriber(self._session, self.session_id, subscriber_data))
 
         self.publishers = publishers
         self.subscribers = subscribers
+
+        # Specific properties will be set in the inherited functions
+
+    def __init__(self, session: BaseUrlSession, data: dict):
+        """
+        This is meant for internal use, thus you should not call it.
+        Use `OpenViduSession.connections` to get an instance of this class.
+        """
+
+        self._session = session
+        self._update_from_data(data)
 
     def force_disconnect(self):
         """
@@ -122,12 +126,8 @@ class OpenViduWEBRTCConnection(OpenViduConnection):
     role: str
     kurento_options: dict
 
-    def __init__(self, session: BaseUrlSession, data: dict):
-        """
-        This is meant for internal use, thus you should not call it.
-        Use `OpenViduSession.connections` to get an instance of this class.
-        """
-        super().__init__(session, data)
+    def _update_from_data(self, data: dict):
+        super()._update_from_data(data)  # Set the common properties
         self.token = data.get('token', None)
         self.client_data = data.get('clientData', None)
         self.role = data['role']
@@ -146,12 +146,8 @@ class OpenViduIPCAMConnection(OpenViduConnection):
     only_play_with_subscribers: bool
     network_cache: int
 
-    def __init__(self, session: BaseUrlSession, data: dict):
-        """
-        This is meant for internal use, thus you should not call it.
-        Use `OpenViduSession.connections` to get an instance of this class.
-        """
-        super().__init__(session, data)
+    def _update_from_data(self, data: dict):
+        super()._update_from_data(data)  # Set the common properties
         self.rtsp_uri = data['rtspUri']
         self.adaptive_bitrate = data['adaptativeBitrate']
         self.only_play_with_subscribers = data['onlyPlayWithSubscribers']
