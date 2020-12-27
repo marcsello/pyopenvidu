@@ -113,8 +113,11 @@ class OpenVidu(object):
 
             r.raise_for_status()
 
-            self.fetch()  # because the POST does not return the proper data object...
-            return self.get_session(r.json()['id'])
+            # As of OpenVidu 2.16.0 the server returns the created session object
+            new_session = OpenViduSession(self._session, r.json())
+            self._openvidu_sessions[new_session.id] = new_session
+
+            return new_session
 
     @property
     def sessions(self) -> List[OpenViduSession]:
