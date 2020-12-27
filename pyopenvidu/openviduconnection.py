@@ -24,7 +24,7 @@ class OpenViduConnection(object):
 
     def _update_from_data(self, data: dict):
         # set property
-        self.id = data['connectionId']
+        self.id = data['id']
         self.type = data['type']  # Either IPCAM or WEBRTC
         self.session_id = data['sessionId']
         self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)

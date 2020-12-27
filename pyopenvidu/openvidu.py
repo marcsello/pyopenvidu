@@ -60,7 +60,7 @@ class OpenVidu(object):
 
                 # update, create valid streams
                 for session_data in new_data:
-                    session_id = session_data['sessionId']
+                    session_id = session_data['id']
                     self._openvidu_sessions[session_id] = OpenViduSession(self._session, session_data)
 
             return data_changed

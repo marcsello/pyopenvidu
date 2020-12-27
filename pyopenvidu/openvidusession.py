@@ -32,7 +32,7 @@ class OpenViduSession(object):
             raise RuntimeError("Unknown connection type")
 
     def __update_from_data(self, data: dict):
-        self.id = data['sessionId']
+        self.id = data['id']
         self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)
         self.is_being_recorded = data['recording']
         self.media_mode = data['mediaMode']
