@@ -114,7 +114,7 @@ class OpenViduSession(object):
         Sends a signal to all participants in the session or specific connections if the `to` property defined.
         OpenViduConnection objects also implement this method.
 
-        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apisignal
+        https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#post-openviduapisignal
 
         :param type_: Type of the signal. In the body example of the table above, only users subscribed to Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal') will trigger signals of any type.
         :param data: Actual data of the signal.
@@ -171,7 +171,7 @@ class OpenViduSession(object):
 
         In the video bandwidth settings 0 means unconstrained. Setting any of them (other than None) overrides the values configured in for the server.
 
-        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apitokens
+        https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#post-openviduapisessionsltsession_idgtconnection
 
         :param role: Allowed values: `SUBSCRIBER`, `PUBLISHER` or `MODERATOR`
         :param data: metadata associated to this token (usually participant's information)
@@ -226,7 +226,7 @@ class OpenViduSession(object):
         Unlike `OpenVidu.create_session` this method does not call fetch() automatically, since the server returns enough data to construct the connection object.
         Keep in mind, that if you want the newly created Connection to appear in the `connections` list, you should call fetch() before accessing the list!
 
-        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apisessionsltsession_idgtconnection
+        https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#post-openviduapisessionsltsession_idgtconnection
 
         :param rtsp_uri: RTSP URI of the IP camera. For example: `rtsp://your.camera.ip:7777/path`.
         :param data: Metadata you want to associate to the camera's participant.

@@ -85,7 +85,7 @@ class OpenVidu(object):
 
         This method calls fetch() automatically since the server does not return the proper data to construct the OpenViduSession object.
 
-        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#post-apisessions
+        https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#post-openviduapisessions
 
         :param custom_session_id: You can fix the sessionId that will be assigned to the session with this parameter.
         :param media_mode: ROUTED (default) or RELAYED
@@ -145,10 +145,8 @@ class OpenVidu(object):
 
         :return: The exact response from the server as a dict.
         """
-        """
-        Note: Since 2.16.0 This endpoint is moved from toplevel under /api
-        https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#get-openviduapiconfig
-        """
+        # Note: Since 2.16.0 This endpoint is moved from toplevel under /api
+        # https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#get-openviduapiconfig
         r = self._session.get('config')
         r.raise_for_status()
 

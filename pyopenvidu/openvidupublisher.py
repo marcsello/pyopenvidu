@@ -32,7 +32,7 @@ class OpenViduPublisher(object):
         After this call, the instace of the object, and the parent OpenViduConnection instance should be considered invalid.
         Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
 
-        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
+        https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#delete-openviduapisessionsltsession_idgtstreamltstream_idgt
         """
         r = self._session.delete(f"sessions/{self.session_id}/stream/{self.stream_id}")
         if r.status_code == 404:
