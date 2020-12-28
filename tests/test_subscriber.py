@@ -3,10 +3,8 @@
 """Tests for OpenViduConnection object"""
 
 import pytest
-from pyopenvidu import OpenVidu
-from urllib.parse import urljoin
 from datetime import datetime
-from .fixtures import URL_BASE, SESSIONS, SECRET
+from .fixtures import SESSIONS
 
 
 #

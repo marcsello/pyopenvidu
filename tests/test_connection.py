@@ -3,10 +3,11 @@
 """Tests for OpenViduConnection object"""
 
 import pytest
-from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
+from pyopenvidu import OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
 from urllib.parse import urljoin
 from datetime import datetime
-from .fixtures import URL_BASE, SESSIONS, SECRET
+from .fixtures import URL_BASE, SESSIONS
+
 
 #
 # Disconnection
@@ -18,24 +19,27 @@ def test_disconnection(connection_instance, requests_mock):
 
     connection_instance.force_disconnect()
 
-    assert a.called
+    assert a.called_once
 
 
 def test_disconnection_failed_no_connection(connection_instance, requests_mock):
-    requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession/connection/vhdxz7abbfirh2lh'), json={},
-                         status_code=404)
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession/connection/vhdxz7abbfirh2lh'), json={},
+                             status_code=404)
 
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         connection_instance.force_disconnect()
 
+    assert a.called_once
+
 
 def test_disconnection_failed_no_session(connection_instance, requests_mock):
-    requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession/connection/vhdxz7abbfirh2lh'), json={},
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession/connection/vhdxz7abbfirh2lh'), json={},
                          status_code=400)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         connection_instance.force_disconnect()
 
+    assert a.called_once
 
 #
 # Signals
@@ -46,6 +50,7 @@ def test_signal(connection_instance, requests_mock):
 
     connection_instance.signal('MY_TYPE', "Hello world!")
 
+    assert a.called_once
     assert a.last_request.json() == {
         "session": SESSIONS['content'][0]['id'],
         "type": "MY_TYPE",
@@ -61,6 +66,8 @@ def test_signal_value_error(connection_instance, requests_mock):
     with pytest.raises(ValueError):
         connection_instance.signal('MY_TYPE', "Hello world!")
 
+    assert a.called_once
+
 
 def test_signal_no_session(connection_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'signal'), status_code=404)
@@ -68,7 +75,7 @@ def test_signal_no_session(connection_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         connection_instance.signal('MY_TYPE', "Hello world!")
 
-    assert a.called
+    assert a.called_once
 
 
 def test_signal_no_connection(connection_instance, requests_mock):
@@ -76,6 +83,8 @@ def test_signal_no_connection(connection_instance, requests_mock):
 
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         connection_instance.signal('MY_TYPE', "Hello world!")
+
+    assert a.called_once
 
 
 #
@@ -89,7 +98,7 @@ def test_force_unpublish_all(connection_instance, requests_mock):
 
     connection_instance.force_unpublish_all_streams()
 
-    assert a.called
+    assert a.called_once
 
 
 #

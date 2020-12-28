@@ -4,10 +4,10 @@
 
 import pytest
 from datetime import datetime
-from pyopenvidu import OpenVidu, OpenViduError, OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
+from pyopenvidu import OpenViduError, OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError
 from urllib.parse import urljoin
 from copy import deepcopy
-from .fixtures import URL_BASE, SESSIONS, SECRET
+from .fixtures import URL_BASE, SESSIONS
 
 
 #
@@ -42,12 +42,12 @@ def test_session_new_webrtc_connection(session_instance, requests_mock):
         "subscribers": []
     }
 
-    adapter = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
 
     new_connection_instance = session_instance.create_webrtc_connection()
 
     assert new_connection_instance.token == new_connection_data['token']
-    assert adapter.last_request.json() == {
+    assert a.last_request.json() == {
         "type": "WEBRTC",
         "role": "PUBLISHER",
     }
@@ -81,13 +81,13 @@ def test_session_new_webrtc_connection_extra(session_instance, requests_mock):
         "subscribers": []
     }
 
-    adapter = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
 
     new_connection_instance = session_instance.create_webrtc_connection(role='MODERATOR', data="meme machine",
                                                                         video_max_send_bandwidth=2500)
 
     assert new_connection_instance.token == new_connection_data['token']
-    assert adapter.last_request.json() == {
+    assert a.last_request.json() == {
         'type': 'WEBRTC',
         'role': 'MODERATOR',
         'data': 'meme machine',
@@ -108,17 +108,21 @@ def test_session_new_webrtc_connection_invalid_session_early(session_instance):
 
 
 def test_session_new_webrtc_connection_missing_session(session_instance, requests_mock):
-    requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=404)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.create_webrtc_connection()
 
+    assert a.called_once
+
 
 def test_session_new_webrtc_connection_serverside_validation_error(session_instance, requests_mock):
-    requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=400)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
         session_instance.create_webrtc_connection()
+
+    assert a.called_once
 
 
 #
@@ -127,11 +131,11 @@ def test_session_new_webrtc_connection_serverside_validation_error(session_insta
 
 
 def test_session_close(session_instance, requests_mock):
-    adapter = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession'), status_code=204)
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession'), status_code=204)
 
     session_instance.close()
 
-    assert adapter.called
+    assert a.called_once
     assert not session_instance.is_valid
 
 
@@ -141,7 +145,7 @@ def test_session_close_missing(session_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.close()
 
-    assert a.called
+    assert a.called_once
     assert not session_instance.is_valid
 
 
@@ -229,6 +233,8 @@ def test_signal_value_error(session_instance, requests_mock):
     with pytest.raises(ValueError):
         session_instance.signal('MY_TYPE', "Hello world!")
 
+    assert a.called_once
+
 
 def test_signal_no_session(session_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'signal'), status_code=404)
@@ -236,7 +242,7 @@ def test_signal_no_session(session_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
 
-    assert a.called
+    assert a.called_once
 
 
 def test_signal_early_no_session(session_instance, requests_mock):
@@ -246,7 +252,7 @@ def test_signal_early_no_session(session_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.fetch()
 
-    assert b.called
+    assert b.called_once
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
@@ -259,6 +265,8 @@ def test_signal_no_connection(session_instance, requests_mock):
 
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
+
+    assert a.called_once
 
 
 #
@@ -304,7 +312,7 @@ def test_session_new_ipcam_connection(session_instance, requests_mock):
         "networkCache": 2000
     }
 
-    assert a.called
+    assert a.called_once
 
     assert new_connection.id == new_connection_data['id']
     assert new_connection.server_data == new_connection_data['serverData']
@@ -363,7 +371,7 @@ def test_session_new_ipcam_connection_extra(session_instance, requests_mock):
         "networkCache": 2000
     }
 
-    assert a.called
+    assert a.called_once
 
     assert new_connection.id == new_connection_data['id']
     assert new_connection.server_data == new_connection_data['serverData']
@@ -379,7 +387,7 @@ def test_session_new_ipcam_connection_extra(session_instance, requests_mock):
     assert new_connection.publishers[0].session_id == 'TestSession'
 
 
-def test_session_new_ipcam_connection_invalid_session_fail_early(session_instance, requests_mock):
+def test_session_new_ipcam_connection_invalid_session_fail_early(session_instance):
     session_instance.is_valid = False
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
@@ -392,7 +400,7 @@ def test_session_new_ipcam_connection_invalid_session(session_instance, requests
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
-    assert a.called
+    assert a.called_once
 
 
 def test_session_new_ipcam_connection_value_error(session_instance, requests_mock):
@@ -401,7 +409,7 @@ def test_session_new_ipcam_connection_value_error(session_instance, requests_moc
     with pytest.raises(ValueError):
         session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
-    assert a.called
+    assert a.called_once
 
 
 def test_session_new_ipcam_connection_server_error(session_instance, requests_mock):
@@ -410,7 +418,7 @@ def test_session_new_ipcam_connection_server_error(session_instance, requests_mo
     with pytest.raises(OpenViduError):
         session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
-    assert a.called
+    assert a.called_once
 
 
 #
@@ -424,11 +432,12 @@ def test_fetching_nothing_happened(session_instance):
 
 
 def test_fetching_session_became_invalid(session_instance, requests_mock):
-    requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json={}, status_code=404)
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.fetch()
 
+    assert a.called_once
     assert not session_instance.is_valid
 
 
@@ -478,7 +487,7 @@ def test_fetching_changed(session_instance, requests_mock):
     assert list(session_instance.connections)[session_instance.connection_count - 1].id == 'con_Xnxg19tonh'
 
     assert is_changed
-    assert a.called
+    assert a.called_once
 
 
 def test_fetching_not_changed_fetch_by_parent(openvidu_instance, session_instance, requests_mock):
@@ -524,7 +533,7 @@ def test_fetching_not_changed_fetch_by_parent(openvidu_instance, session_instanc
     assert len(list(session_instance.connections)) == SESSIONS['content'][0]['connections']['numberOfElements']
 
     assert is_changed
-    assert a.called
+    assert a.called_once
 
 
 #

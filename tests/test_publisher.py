@@ -3,11 +3,11 @@
 """Tests for OpenViduConnection object"""
 
 import pytest
-from pyopenvidu import OpenVidu, OpenViduStreamDoesNotExistsError, OpenViduSessionDoesNotExistsError, \
+from pyopenvidu import OpenViduStreamDoesNotExistsError, OpenViduSessionDoesNotExistsError, \
     OpenViduStreamError
 from urllib.parse import urljoin
 from datetime import datetime
-from .fixtures import URL_BASE, SESSIONS, SECRET
+from .fixtures import URL_BASE, SESSIONS
 
 
 #
@@ -21,7 +21,7 @@ def test_unpublish(connection_instance, requests_mock):
 
     connection_instance.publishers[0].force_unpublish()
 
-    assert a.called
+    assert a.called_once
 
 
 def test_unpublish_no_publisher(connection_instance, requests_mock):
@@ -32,7 +32,7 @@ def test_unpublish_no_publisher(connection_instance, requests_mock):
     with pytest.raises(OpenViduStreamDoesNotExistsError):
         connection_instance.publishers[0].force_unpublish()
 
-    assert a.called
+    assert a.called_once
 
 
 def test_unpublish_no_session(connection_instance, requests_mock):
@@ -43,7 +43,7 @@ def test_unpublish_no_session(connection_instance, requests_mock):
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         connection_instance.publishers[0].force_unpublish()
 
-    assert a.called
+    assert a.called_once
 
 
 def test_unpublish_ipcam(connection_instance, requests_mock):
@@ -54,7 +54,7 @@ def test_unpublish_ipcam(connection_instance, requests_mock):
     with pytest.raises(OpenViduStreamError):
         connection_instance.publishers[0].force_unpublish()
 
-    assert a.called
+    assert a.called_once
 
 
 #
