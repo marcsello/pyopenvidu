@@ -34,12 +34,13 @@ def test_disconnection_failed_no_connection(connection_instance, requests_mock):
 
 def test_disconnection_failed_no_session(connection_instance, requests_mock):
     a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession/connection/vhdxz7abbfirh2lh'), json={},
-                         status_code=400)
+                             status_code=400)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         connection_instance.force_disconnect()
 
     assert a.called_once
+
 
 #
 # Signals
@@ -119,6 +120,11 @@ def test_properties(connection_instance):
     assert connection_instance.platform == SESSIONS['content'][0]['connections']['content'][0]['platform']
     assert connection_instance.role == SESSIONS['content'][0]['connections']['content'][0]['role']
 
+    assert connection_instance.publisher_count == len(SESSIONS['content'][0]['connections']['content'][0]['publishers'])
+    assert connection_instance.subscriber_count == len(
+        SESSIONS['content'][0]['connections']['content'][0]['subscribers']
+    )
+
     assert len(connection_instance.publishers) == len(SESSIONS['content'][0]['connections']['content'][0]['publishers'])
 
 
@@ -138,6 +144,11 @@ def test_properties_none_fields(session_instance):
     assert connection_instance.platform == SESSIONS['content'][0]['connections']['content'][1]['platform']
     assert connection_instance.role == SESSIONS['content'][0]['connections']['content'][1]['role']
 
+    assert connection_instance.publisher_count == len(SESSIONS['content'][0]['connections']['content'][0]['publishers'])
+    assert connection_instance.subscriber_count == len(
+        SESSIONS['content'][0]['connections']['content'][0]['subscribers']
+    )
+
     assert len(connection_instance.publishers) == len(SESSIONS['content'][0]['connections']['content'][1]['publishers'])
 
 
@@ -154,5 +165,10 @@ def test_properties_ipcam_fields(openvidu_instance):
 
     assert connection_instance.server_data == SESSIONS['content'][1]['connections']['content'][0]['serverData']
     assert connection_instance.platform == SESSIONS['content'][1]['connections']['content'][0]['platform']
+
+    assert connection_instance.publisher_count == len(SESSIONS['content'][1]['connections']['content'][0]['publishers'])
+    assert connection_instance.subscriber_count == len(
+        SESSIONS['content'][1]['connections']['content'][0]['subscribers']
+    )
 
     assert len(connection_instance.publishers) == len(SESSIONS['content'][1]['connections']['content'][0]['publishers'])

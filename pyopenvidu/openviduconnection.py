@@ -153,6 +153,14 @@ class OpenViduConnection(object):
         for publisher in self.publishers:
             publisher.force_unpublish()
 
+    @property
+    def publisher_count(self) -> int:
+        return len(self.publishers)
+
+    @property
+    def subscriber_count(self) -> int:
+        return len(self.subscribers)
+
 
 # Notice: Frozen should be changed to True in later versions of Python3 where a nice method for custom initializer is implemented
 @dataclass(init=False, frozen=False)
