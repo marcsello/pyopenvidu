@@ -270,7 +270,6 @@ def test_fetching_changed(openvidu_instance, requests_mock):
         "sessionId": "ses_YnDaGYNcd7",
         "createdAt": 1538481999022,
         "activeAt": 1538481999843,
-        "location": "",
         "platform": "Chrome 85.0.4183.102 on Linux 64-bit",
         "token": "wss://localhost:4443?sessionId=TestSession&token=tok_AVe8o7iltWqtijyl&role=PUBLISHER&version=2.16.0&coturnIp=localhost&turnUsername=M2ALIY&turnCredential=7kfjy2",
         "serverData": "My Server Data",

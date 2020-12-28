@@ -15,36 +15,81 @@ from .fixtures import URL_BASE, SESSIONS, SECRET
 #
 
 def test_session_new_webrtc_connection(session_instance, requests_mock):
-    token_response = {
-        "id": "wss://localhost:4443?sessionId=zfgmthb8jl9uellk&token=lnlrtnkwm4v8l7uc&role=PUBLISHER&turnUsername=FYYNRC&turnCredential=yfxxs3",
-        "session": "zfgmthb8jl9uellk", "role": "PUBLISHER", "data": "User Data",
-        "token": "wss://localhost:4443?sessionId=zfgmthb8jl9uellk&token=lnlrtnkwm4v8l7uc&role=PUBLISHER&turnUsername=FYYNRC&turnCredential=yfxxs3",
-        "kurentoOptions": {"videoMaxSendBandwidth": 700, "allowedFilters": ["GStreamerFilter", "ZBarFilter"]}}
+    new_connection_data = {
+        "id": "con_Xnxg19tonh",
+        "object": "connection",
+        "type": "WEBRTC",
+        "status": "active",
+        "sessionId": "ses_YnDaGYNcd7",
+        "createdAt": 1538481999022,
+        "activeAt": 1538481999843,
+        "platform": "Chrome 85.0.4183.102 on Linux 64-bit",
+        "token": "wss://localhost:4443?sessionId=TestSession&token=tok_AVe8o7iltWqtijyl&role=PUBLISHER&version=2.16.0&coturnIp=localhost&turnUsername=M2ALIY&turnCredential=7kfjy2",
+        "serverData": "",
+        "clientData": "",
+        "role": "PUBLISHER",
+        "kurentoOptions": {
+            "videoMaxRecvBandwidth": 1000,
+            "videoMinRecvBandwidth": 300,
+            "videoMaxSendBandwidth": 1000,
+            "videoMinSendBandwidth": 300,
+            "allowedFilters": [
+                "GStreamerFilter",
+                "ZBarFilter"
+            ]
+        },
+        "publishers": [],
+        "subscribers": []
+    }
 
-    adapter = requests_mock.post(urljoin(URL_BASE, 'tokens'), json=token_response)
+    adapter = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
 
-    token = session_instance.create_webrtc_connection()
+    new_connection_instance = session_instance.create_webrtc_connection()
 
-    assert token == token_response['token']
-    assert adapter.last_request.json() == {'role': 'PUBLISHER', 'session': 'TestSession'}
+    assert new_connection_instance.token == new_connection_data['token']
+    assert adapter.last_request.json() == {
+        "type": "WEBRTC",
+        "role": "PUBLISHER",
+    }
 
 
 def test_session_new_webrtc_connection_extra(session_instance, requests_mock):
-    token_response = {
-        "id": "wss://localhost:4443?sessionId=zfgmthb8jl9uellk&token=lnlrtnkwm4v8l7uc&role=PUBLISHER&turnUsername=FYYNRC&turnCredential=yfxxs3",
-        "session": "zfgmthb8jl9uellk", "role": "PUBLISHER", "data": "User Data",
-        "token": "wss://localhost:4443?sessionId=zfgmthb8jl9uellk&token=lnlrtnkwm4v8l7uc&role=PUBLISHER&turnUsername=FYYNRC&turnCredential=yfxxs3",
-        "kurentoOptions": {"videoMaxSendBandwidth": 700, "allowedFilters": ["GStreamerFilter", "ZBarFilter"]}}
+    new_connection_data = {
+        "id": "con_Xnxg19tonh",
+        "object": "connection",
+        "type": "WEBRTC",
+        "status": "active",
+        "sessionId": "ses_YnDaGYNcd7",
+        "createdAt": 1538481999022,
+        "activeAt": 1538481999843,
+        "platform": "Chrome 85.0.4183.102 on Linux 64-bit",
+        "token": "wss://localhost:4443?sessionId=TestSession&token=tok_AVe8o7iltWqtijyl&role=PUBLISHER&version=2.16.0&coturnIp=localhost&turnUsername=M2ALIY&turnCredential=7kfjy2",
+        "serverData": "meme machine",
+        "clientData": "My Client Data",
+        "role": "MODERATOR",
+        "kurentoOptions": {
+            "videoMaxRecvBandwidth": 1000,
+            "videoMinRecvBandwidth": 300,
+            "videoMaxSendBandwidth": 2500,
+            "videoMinSendBandwidth": 300,
+            "allowedFilters": [
+                "GStreamerFilter",
+                "ZBarFilter"
+            ]
+        },
+        "publishers": [],
+        "subscribers": []
+    }
 
-    adapter = requests_mock.post(urljoin(URL_BASE, 'tokens'), json=token_response)
+    adapter = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
 
-    token = session_instance.create_webrtc_connection(role='MODERATOR', data="meme machine",
-                                                      video_max_send_bandwidth=2500)
+    new_connection_instance = session_instance.create_webrtc_connection(role='MODERATOR', data="meme machine",
+                                                                        video_max_send_bandwidth=2500)
 
-    assert token == token_response['token']
+    assert new_connection_instance.token == new_connection_data['token']
     assert adapter.last_request.json() == {
+        'type': 'WEBRTC',
         'role': 'MODERATOR',
-        'session': 'TestSession',
         'data': 'meme machine',
         'kurentoOptions': {'videoMaxSendBandwidth': 2500}
     }
@@ -56,21 +101,21 @@ def test_session_new_webrtc_connection_validation_error(session_instance):
 
 
 def test_session_new_webrtc_connection_invalid_session_early(session_instance):
-    session_instance._data = {}
+    session_instance.is_valid = False
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.create_webrtc_connection()
 
 
 def test_session_new_webrtc_connection_missing_session(session_instance, requests_mock):
-    requests_mock.post(urljoin(URL_BASE, 'tokens'), json={}, status_code=404)
+    requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.create_webrtc_connection()
 
 
 def test_session_new_webrtc_connection_serverside_validation_error(session_instance, requests_mock):
-    requests_mock.post(urljoin(URL_BASE, 'tokens'), json={}, status_code=400)
+    requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
         session_instance.create_webrtc_connection()
@@ -91,11 +136,12 @@ def test_session_close(session_instance, requests_mock):
 
 
 def test_session_close_missing(session_instance, requests_mock):
-    requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession'), status_code=404)
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession'), status_code=404)
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.close()
 
+    assert a.called
     assert not session_instance.is_valid
 
 
@@ -104,7 +150,7 @@ def test_session_close_missing(session_instance, requests_mock):
 #
 
 def test_connection_invalid_session_missing(session_instance):
-    session_instance._data = {}
+    session_instance.is_valid = False
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         c = list(session_instance.connections)
@@ -122,7 +168,7 @@ def test_missing_connection(session_instance):
 
 
 def test_connection_invalid_session_early(session_instance):
-    session_instance._data = {}
+    session_instance.is_valid = False
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         conn = session_instance.get_connection('vhdxz7abbfirh2lh')
@@ -131,18 +177,17 @@ def test_connection_invalid_session_early(session_instance):
 def test_connections(session_instance):
     conns = list(session_instance.connections)
 
-    assert len(conns) == 3
-    assert conns[0].id == 'vhdxz7abbfirh2lh'
-    assert conns[1].id == 'maxawd3ysuj1rxvq'
-    assert conns[2].id == 'maxawc4zsuj1rxva'
+    assert len(conns) == SESSIONS['content'][0]['connections']['numberOfElements']
+    assert conns[0].id == SESSIONS['content'][0]['connections']['content'][0]['id']
+    assert conns[1].id == SESSIONS['content'][0]['connections']['content'][1]['id']
 
 
 def test_connections_count(session_instance):
-    assert session_instance.connection_count == 3
+    assert session_instance.connection_count == SESSIONS['content'][0]['connections']['numberOfElements']
 
 
 def test_connections_count_invalid_session_early(session_instance):
-    session_instance._data = {}
+    session_instance.is_valid = False
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         a = session_instance.connection_count
@@ -222,29 +267,25 @@ def test_signal_no_connection(session_instance, requests_mock):
 
 def test_session_new_ipcam_connection(session_instance, requests_mock):
     new_connection_data = {
-        "connectionId": "ipc_IPCAM_rtsp_A8MJ_91_191_213_49_555_live_mpeg4_sdp",
-        "createdAt": 1582121476380,
-        "location": "unknown",
+        "id": "con_Xnxg19tonh",
+        "object": "connection",
+        "type": "IPCAM",
+        "status": "active",
+        "sessionId": "TestSession",
+        "createdAt": 1538481999022,
+        "activeAt": 1538481999843,
         "platform": "IPCAM",
-        "role": "PUBLISHER",
+        "token": None,
         "serverData": "",
+        "clientData": None,
+        "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
+        "adaptativeBitrate": True,
+        "onlyPlayWithSubscribers": True,
+        "networkCache": 2000,
         "publishers": [
             {
-                "createdAt": 1582121476439,
-                "streamId": "str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp",
-                "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
-                "mediaOptions": {
-                    "hasAudio": True,
-                    "audioActive": True,
-                    "hasVideo": True,
-                    "videoActive": True,
-                    "typeOfVideo": "IPCAM",
-                    "frameRate": None,
-                    "videoDimensions": None,
-                    "filter": {},
-                    "adaptativeBitrate": True,
-                    "onlyPlayWithSubscribers": True
-                }
+                "createdAt": 1538481999710,
+                "streamId": "str_CAM_NhxL_con_Xnxg19tonh",
             }
         ],
         "subscribers": []
@@ -259,49 +300,47 @@ def test_session_new_ipcam_connection(session_instance, requests_mock):
         "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
         "adaptativeBitrate": True,
         "onlyPlayWithSubscribers": True,
-        "data": ''
+        "data": '',
+        "networkCache": 2000
     }
 
     assert a.called
 
-    assert new_connection.id == 'ipc_IPCAM_rtsp_A8MJ_91_191_213_49_555_live_mpeg4_sdp'
-    assert new_connection.role == 'PUBLISHER'
-    assert new_connection.client_data is None
-    assert new_connection.token is None
-    assert new_connection.server_data == ''
-    assert new_connection.created_at == datetime.utcfromtimestamp(1582121476380 / 1000.0)
-    assert new_connection.publishers[0].created_at == datetime.utcfromtimestamp(1582121476439 / 1000.0)
-    assert new_connection.publishers[0].stream_id == 'str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp'
-    assert new_connection.publishers[0].rtsp_uri == 'rtsp://91.191.213.50:554/live_mpeg4.sdp'
+    assert new_connection.id == new_connection_data['id']
+    assert new_connection.server_data == new_connection_data['serverData']
+    assert new_connection.created_at == datetime.utcfromtimestamp(new_connection_data['createdAt'] / 1000.0)
+    assert new_connection.active_at == datetime.utcfromtimestamp(new_connection_data['activeAt'] / 1000.0)
+    assert new_connection.rtsp_uri == 'rtsp://91.191.213.50:554/live_mpeg4.sdp'
+    assert new_connection.session_id == 'TestSession'
+
+    assert new_connection.publishers[0].created_at == datetime.utcfromtimestamp(
+        new_connection_data['publishers'][0]['createdAt'] / 1000.0
+    )
+    assert new_connection.publishers[0].stream_id == new_connection_data['publishers'][0]['streamId']
     assert new_connection.publishers[0].session_id == 'TestSession'
-    assert new_connection.publishers[0].media_options == new_connection_data['publishers'][0]['mediaOptions']
 
 
 def test_session_new_ipcam_connection_extra(session_instance, requests_mock):
     new_connection_data = {
-        "connectionId": "ipc_IPCAM_rtsp_A8MJ_91_191_213_49_555_live_mpeg4_sdp",
-        "createdAt": 1582121476380,
-        "location": "unknown",
+        "id": "con_Xnxg19tonh",
+        "object": "connection",
+        "type": "IPCAM",
+        "status": "active",
+        "sessionId": "TestSession",
+        "createdAt": 1538481999022,
+        "activeAt": 1538481999843,
         "platform": "IPCAM",
-        "role": "PUBLISHER",
+        "token": None,
         "serverData": "TEST_DATA",
+        "clientData": None,
+        "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
+        "adaptativeBitrate": True,
+        "onlyPlayWithSubscribers": True,
+        "networkCache": 2000,
         "publishers": [
             {
-                "createdAt": 1582121476439,
-                "streamId": "str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp",
-                "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
-                "mediaOptions": {
-                    "hasAudio": True,
-                    "audioActive": True,
-                    "hasVideo": True,
-                    "videoActive": True,
-                    "typeOfVideo": "IPCAM",
-                    "frameRate": None,
-                    "videoDimensions": None,
-                    "filter": {},
-                    "adaptativeBitrate": False,
-                    "onlyPlayWithSubscribers": True
-                }
+                "createdAt": 1538481999710,
+                "streamId": "str_CAM_NhxL_con_Xnxg19tonh",
             }
         ],
         "subscribers": []
@@ -309,34 +348,39 @@ def test_session_new_ipcam_connection_extra(session_instance, requests_mock):
 
     a = requests_mock.post(urljoin(URL_BASE, 'sessions/TestSession/connection'), json=new_connection_data)
 
-    new_connection = session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp", "TEST_DATA",
-                                                              adaptive_bitrate=False)
+    new_connection = session_instance.create_ipcam_connection(
+        "rtsp://91.191.213.50:554/live_mpeg4.sdp",
+        "TEST_DATA",
+        adaptive_bitrate=False
+    )
 
     assert a.last_request.json() == {
         "type": "IPCAM",
         "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
         "adaptativeBitrate": False,
         "onlyPlayWithSubscribers": True,
-        "data": 'TEST_DATA'
+        "data": 'TEST_DATA',
+        "networkCache": 2000
     }
 
     assert a.called
 
-    assert new_connection.id == 'ipc_IPCAM_rtsp_A8MJ_91_191_213_49_555_live_mpeg4_sdp'
-    assert new_connection.role == 'PUBLISHER'
-    assert new_connection.client_data is None
-    assert new_connection.token is None
-    assert new_connection.server_data == 'TEST_DATA'
-    assert new_connection.created_at == datetime.utcfromtimestamp(1582121476380 / 1000.0)
-    assert new_connection.publishers[0].created_at == datetime.utcfromtimestamp(1582121476439 / 1000.0)
-    assert new_connection.publishers[0].stream_id == 'str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp'
-    assert new_connection.publishers[0].rtsp_uri == 'rtsp://91.191.213.50:554/live_mpeg4.sdp'
+    assert new_connection.id == new_connection_data['id']
+    assert new_connection.server_data == new_connection_data['serverData']
+    assert new_connection.created_at == datetime.utcfromtimestamp(new_connection_data['createdAt'] / 1000.0)
+    assert new_connection.active_at == datetime.utcfromtimestamp(new_connection_data['activeAt'] / 1000.0)
+    assert new_connection.rtsp_uri == 'rtsp://91.191.213.50:554/live_mpeg4.sdp'
+    assert new_connection.session_id == 'TestSession'
+
+    assert new_connection.publishers[0].created_at == datetime.utcfromtimestamp(
+        new_connection_data['publishers'][0]['createdAt'] / 1000.0
+    )
+    assert new_connection.publishers[0].stream_id == new_connection_data['publishers'][0]['streamId']
     assert new_connection.publishers[0].session_id == 'TestSession'
-    assert new_connection.publishers[0].media_options == new_connection_data['publishers'][0]['mediaOptions']
 
 
 def test_session_new_ipcam_connection_invalid_session_fail_early(session_instance, requests_mock):
-    session_instance._data = {}
+    session_instance.is_valid = False
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
@@ -397,12 +441,10 @@ def test_fetching_changed(session_instance, requests_mock):
         "sessionId": "ses_YnDaGYNcd7",
         "createdAt": 1538481999022,
         "activeAt": 1538481999843,
-        "location": "",
         "platform": "Chrome 85.0.4183.102 on Linux 64-bit",
         "token": "wss://localhost:4443?sessionId=TestSession&token=tok_AVe8o7iltWqtijyl&role=PUBLISHER&version=2.16.0&coturnIp=localhost&turnUsername=M2ALIY&turnCredential=7kfjy2",
         "serverData": "My Server Data",
         "clientData": "",
-        "record": False,
         "role": "PUBLISHER",
         "kurentoOptions": {
             "videoMaxRecvBandwidth": 1000,
@@ -433,7 +475,7 @@ def test_fetching_changed(session_instance, requests_mock):
     is_changed = session_instance.fetch()
 
     assert session_instance.connection_count == NEW_SESSIONS['content'][0]['connections']['numberOfElements']
-    assert list(session_instance.connections)[session_instance.connection_count-1].id == 'con_Xnxg19tonh'
+    assert list(session_instance.connections)[session_instance.connection_count - 1].id == 'con_Xnxg19tonh'
 
     assert is_changed
     assert a.called
@@ -448,12 +490,10 @@ def test_fetching_not_changed_fetch_by_parent(openvidu_instance, session_instanc
         "sessionId": "ses_YnDaGYNcd7",
         "createdAt": 1538481999022,
         "activeAt": 1538481999843,
-        "location": "",
         "platform": "Chrome 85.0.4183.102 on Linux 64-bit",
         "token": "wss://localhost:4443?sessionId=TestSession&token=tok_AVe8o7iltWqtijyl&role=PUBLISHER&version=2.16.0&coturnIp=localhost&turnUsername=M2ALIY&turnCredential=7kfjy2",
         "serverData": "My Server Data",
         "clientData": "",
-        "record": False,
         "role": "PUBLISHER",
         "kurentoOptions": {
             "videoMaxRecvBandwidth": 1000,
