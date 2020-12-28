@@ -225,7 +225,7 @@ class OpenViduSession(object):
             return new_connection
 
     def create_ipcam_connection(self, rtsp_uri: str, data: str = '', adaptive_bitrate: bool = True,
-                                only_play_with_subscribers: bool = True) -> OpenViduIPCAMConnection:
+                                only_play_with_subscribers: bool = True, network_cache:int = 2000) -> OpenViduIPCAMConnection:
         """
         Publishes a new IPCAM rtsp stream to the session.
 
@@ -238,6 +238,7 @@ class OpenViduSession(object):
         :param data: Metadata you want to associate to the camera's participant.
         :param adaptive_bitrate: Whether to use adaptive bitrate or not.
         :param only_play_with_subscribers: Enable the IP camera stream only when some user is subscribed to it.
+        :param network_cache: Size of the buffer of the endpoint receiving the IP camera's stream, in milliseconds.
         :return: An OpenVidu connection object represents the newly created connection.
         """
         with self._lock:
@@ -246,10 +247,11 @@ class OpenViduSession(object):
 
             parameters = {
                 "type": "IPCAM",
+                "data": data,
                 "rtspUri": rtsp_uri,
                 "adaptativeBitrate": adaptive_bitrate,
                 "onlyPlayWithSubscribers": only_play_with_subscribers,
-                "data": data
+                "networkCache": network_cache
             }
 
             response = self.__create_connection(parameters)
