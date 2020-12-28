@@ -62,7 +62,6 @@ class OpenVidu(object):
 
         return data_changed
 
-
     def get_session(self, session_id: str) -> OpenViduSession:
         """
         Get a currently active session to the server.
@@ -79,7 +78,6 @@ class OpenVidu(object):
             raise OpenViduSessionDoesNotExistsError()
 
         return session
-
 
     def create_session(self, custom_session_id: str = None, media_mode: str = None) -> OpenViduSession:
         """
@@ -116,7 +114,6 @@ class OpenVidu(object):
 
         return new_session
 
-
     @property
     def sessions(self) -> List[OpenViduSession]:
         """
@@ -128,7 +125,6 @@ class OpenVidu(object):
             sess for sess in self._openvidu_sessions.values() if sess.is_valid
         ]
 
-
     @property
     def session_count(self) -> int:
         """
@@ -137,7 +133,6 @@ class OpenVidu(object):
         :return: The number of active sessions.
         """
         return len(self.sessions)
-
 
     def get_config(self) -> dict:
         """

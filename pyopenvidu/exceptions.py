@@ -14,6 +14,7 @@ class OpenViduSessionError(OpenViduError):
 class OpenViduSessionDoesNotExistsError(OpenViduSessionError):
     pass
 
+
 class OpenViduSessionExistsError(OpenViduSessionError):
     pass
 
