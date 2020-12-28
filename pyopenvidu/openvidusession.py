@@ -106,8 +106,6 @@ class OpenViduSession(object):
         :return: A OpenViduConnection objects.
         """
         with self._lock:
-            if not self.is_valid:
-                raise OpenViduSessionDoesNotExistsError()
 
             for connection in self.connections:
                 if connection.id == connection_id:
@@ -267,7 +265,4 @@ class OpenViduSession(object):
         :return: The number of active connections.
         """
         with self._lock:
-            if not self.is_valid:
-                raise OpenViduSessionDoesNotExistsError()
-
             return len(self.connections)

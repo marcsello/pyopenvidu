@@ -156,8 +156,8 @@ def test_session_close_missing(session_instance, requests_mock):
 def test_connection_invalid_session_missing(session_instance):
     session_instance.is_valid = False
 
-    with pytest.raises(OpenViduSessionDoesNotExistsError):
-        c = list(session_instance.connections)
+    # No exception should be raised
+    c = session_instance.connections
 
 
 def test_connection(session_instance):
@@ -174,8 +174,8 @@ def test_missing_connection(session_instance):
 def test_connection_invalid_session_early(session_instance):
     session_instance.is_valid = False
 
-    with pytest.raises(OpenViduSessionDoesNotExistsError):
-        conn = session_instance.get_connection('vhdxz7abbfirh2lh')
+    #no exception should be raised
+    session_instance.get_connection('vhdxz7abbfirh2lh')
 
 
 def test_connections(session_instance):
@@ -193,8 +193,8 @@ def test_connections_count(session_instance):
 def test_connections_count_invalid_session_early(session_instance):
     session_instance.is_valid = False
 
-    with pytest.raises(OpenViduSessionDoesNotExistsError):
-        a = session_instance.connection_count
+    # No exception should be raised
+    session_instance.connection_count
 
 
 #
