@@ -2,7 +2,6 @@
 from typing import List, Optional
 from dataclasses import dataclass
 from datetime import datetime
-from threading import RLock
 from requests_toolbelt.sessions import BaseUrlSession
 
 from .exceptions import OpenViduSessionDoesNotExistsError, OpenViduConnectionDoesNotExistsError, OpenViduError
@@ -53,8 +52,6 @@ class OpenViduSession(object):
 
         self._session = session
 
-        self._lock = RLock()
-
         self.__update_from_data(data)
         self._last_fetch_result = data
 
@@ -65,38 +62,38 @@ class OpenViduSession(object):
 
         :return: True if the OpenViduSession status has changed with respect to the server, False if not. This applies to any property or sub-property of the object
         """
-        with self._lock:
-            r = self._session.get(f"sessions/{self.id}")
 
-            if r.status_code == 404:
-                self.is_valid = False
-                raise OpenViduSessionDoesNotExistsError()
+        r = self._session.get(f"sessions/{self.id}")
 
-            r.raise_for_status()
+        if r.status_code == 404:
+            self.is_valid = False
+            raise OpenViduSessionDoesNotExistsError()
 
-            new_data = r.json()
-            is_changed = self._last_fetch_result != new_data
+        r.raise_for_status()
 
-            if is_changed:
-                self.__update_from_data(r.json())
-                self._last_fetch_result = new_data
+        new_data = r.json()
+        is_changed = self._last_fetch_result != new_data
 
-            return is_changed
+        if is_changed:
+            self.__update_from_data(r.json())
+            self._last_fetch_result = new_data
+
+        return is_changed
 
     def close(self):
         """
         Gracefully closes the Session: unpublishes all streams and evicts every participant.
         Further calls to this object will fail.
         """
-        with self._lock:
-            r = self._session.delete(f"sessions/{self.id}")
 
-            if r.status_code == 404:
-                self.is_valid = False
-                raise OpenViduSessionDoesNotExistsError()
+        r = self._session.delete(f"sessions/{self.id}")
 
-            r.raise_for_status()
+        if r.status_code == 404:
             self.is_valid = False
+            raise OpenViduSessionDoesNotExistsError()
+
+        r.raise_for_status()
+        self.is_valid = False
 
     def get_connection(self, connection_id: str) -> OpenViduConnection:
         """
@@ -105,13 +102,12 @@ class OpenViduSession(object):
         :param connection_id: Connection id.
         :return: A OpenViduConnection objects.
         """
-        with self._lock:
 
-            for connection in self.connections:
-                if connection.id == connection_id:
-                    return connection
+        for connection in self.connections:
+            if connection.id == connection_id:
+                return connection
 
-            raise OpenViduConnectionDoesNotExistsError()
+        raise OpenViduConnectionDoesNotExistsError()
 
     def signal(self, type_: str = None, data: str = None, to: Optional[List[OpenViduConnection]] = None):
         """
@@ -124,33 +120,33 @@ class OpenViduSession(object):
         :param data: Actual data of the signal.
         :param to: List of OpenViduConnection objects to which you want to send the signal. If this property is not set (None) the signal will be sent to all participants of the session.
         """
-        with self._lock:
-            if not self.is_valid:  # Fail early... and always
-                raise OpenViduSessionDoesNotExistsError()
 
-            if to:
-                recipient_list = [connection.id for connection in to]
-            else:
-                recipient_list = None
+        if not self.is_valid:  # Fail early... and always
+            raise OpenViduSessionDoesNotExistsError()
 
-            parameters = {
-                "session": self.id,
-                "to": recipient_list,
-                "type": type_,
-                "data": data
-            }
+        if to:
+            recipient_list = [connection.id for connection in to]
+        else:
+            recipient_list = None
 
-            parameters = {k: v for k, v in parameters.items() if v is not None}
+        parameters = {
+            "session": self.id,
+            "to": recipient_list,
+            "type": type_,
+            "data": data
+        }
 
-            # send request
-            r = self._session.post('signal', json=parameters)
+        parameters = {k: v for k, v in parameters.items() if v is not None}
 
-            if r.status_code == 404:
-                raise OpenViduSessionDoesNotExistsError()
-            elif r.status_code == 400:
-                raise ValueError()
-            elif r.status_code == 406:
-                raise OpenViduConnectionDoesNotExistsError()
+        # send request
+        r = self._session.post('signal', json=parameters)
+
+        if r.status_code == 404:
+            raise OpenViduSessionDoesNotExistsError()
+        elif r.status_code == 400:
+            raise ValueError()
+        elif r.status_code == 406:
+            raise OpenViduConnectionDoesNotExistsError()
 
         r.raise_for_status()
 
@@ -186,44 +182,44 @@ class OpenViduSession(object):
         :param allowed_filters: Array of strings containing the names of the filters the user owning the token will be able to apply.
         :return: An OpenVidu connection object represents the newly created connection.
         """
-        with self._lock:
 
-            if not self.is_valid:  # Fail early... and always
-                raise OpenViduSessionDoesNotExistsError()
+        if not self.is_valid:  # Fail early... and always
+            raise OpenViduSessionDoesNotExistsError()
 
-            # Prepare parameters
+        # Prepare parameters
 
-            if role not in ['SUBSCRIBER', 'PUBLISHER', 'MODERATOR']:
-                raise ValueError(f"Role must be any of SUBSCRIBER, PUBLISHER or MODERATOR, not {role}")
+        if role not in ['SUBSCRIBER', 'PUBLISHER', 'MODERATOR']:
+            raise ValueError(f"Role must be any of SUBSCRIBER, PUBLISHER or MODERATOR, not {role}")
 
-            parameters = {
-                "type": "WEBRTC",
-                "role": role
-            }
+        parameters = {
+            "type": "WEBRTC",
+            "role": role
+        }
 
-            if data:
-                parameters['data'] = data
+        if data:
+            parameters['data'] = data
 
-            kurento_options = {
-                "videoMaxRecvBandwidth": video_max_recv_bandwidth,
-                "videoMinRecvBandwidth": video_min_recv_bandwidth,
-                "videoMaxSendBandwidth": video_max_send_bandwidth,
-                "videoMinSendBandwidth": video_min_send_bandwidth,
-                "allowedFilters": allowed_filters
-            }
+        kurento_options = {
+            "videoMaxRecvBandwidth": video_max_recv_bandwidth,
+            "videoMinRecvBandwidth": video_min_recv_bandwidth,
+            "videoMaxSendBandwidth": video_max_send_bandwidth,
+            "videoMinSendBandwidth": video_min_send_bandwidth,
+            "allowedFilters": allowed_filters
+        }
 
-            kurento_options = {k: v for k, v in kurento_options.items() if v is not None}
+        kurento_options = {k: v for k, v in kurento_options.items() if v is not None}
 
-            if kurento_options:
-                parameters['kurentoOptions'] = kurento_options
+        if kurento_options:
+            parameters['kurentoOptions'] = kurento_options
 
-            response = self.__create_connection(parameters)
-            new_connection = OpenViduWEBRTCConnection(self._session, response)
-            self.connections.append(new_connection)
-            return new_connection
+        response = self.__create_connection(parameters)
+        new_connection = OpenViduWEBRTCConnection(self._session, response)
+        self.connections.append(new_connection)
+        return new_connection
 
     def create_ipcam_connection(self, rtsp_uri: str, data: str = '', adaptive_bitrate: bool = True,
-                                only_play_with_subscribers: bool = True, network_cache:int = 2000) -> OpenViduIPCAMConnection:
+                                only_play_with_subscribers: bool = True,
+                                network_cache: int = 2000) -> OpenViduIPCAMConnection:
         """
         Publishes a new IPCAM rtsp stream to the session.
 
@@ -239,23 +235,23 @@ class OpenViduSession(object):
         :param network_cache: Size of the buffer of the endpoint receiving the IP camera's stream, in milliseconds.
         :return: An OpenVidu connection object represents the newly created connection.
         """
-        with self._lock:
-            if not self.is_valid:  # Fail early... and always
-                raise OpenViduSessionDoesNotExistsError()
 
-            parameters = {
-                "type": "IPCAM",
-                "data": data,
-                "rtspUri": rtsp_uri,
-                "adaptativeBitrate": adaptive_bitrate,
-                "onlyPlayWithSubscribers": only_play_with_subscribers,
-                "networkCache": network_cache
-            }
+        if not self.is_valid:  # Fail early... and always
+            raise OpenViduSessionDoesNotExistsError()
 
-            response = self.__create_connection(parameters)
-            new_connection = OpenViduIPCAMConnection(self._session, response)
-            self.connections.append(new_connection)
-            return new_connection
+        parameters = {
+            "type": "IPCAM",
+            "data": data,
+            "rtspUri": rtsp_uri,
+            "adaptativeBitrate": adaptive_bitrate,
+            "onlyPlayWithSubscribers": only_play_with_subscribers,
+            "networkCache": network_cache
+        }
+
+        response = self.__create_connection(parameters)
+        new_connection = OpenViduIPCAMConnection(self._session, response)
+        self.connections.append(new_connection)
+        return new_connection
 
     @property
     def connection_count(self) -> int:
@@ -264,5 +260,5 @@ class OpenViduSession(object):
 
         :return: The number of active connections.
         """
-        with self._lock:
-            return len(self.connections)
+
+        return len(self.connections)

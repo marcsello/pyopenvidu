@@ -1,7 +1,6 @@
 """OpenVidu class."""
 from typing import List, Union
 from functools import partial
-from threading import RLock
 
 from requests_toolbelt.sessions import BaseUrlSession
 from requests.auth import HTTPBasicAuth
@@ -33,8 +32,6 @@ class OpenVidu(object):
 
         self._session.request = partial(self._session.request, timeout=timeout)
 
-        self._lock = RLock()
-
         self._openvidu_sessions = {}  # id:object
 
         self._last_fetch_result = {}  # Used only to calculate the return value of the fetch() call
@@ -47,23 +44,24 @@ class OpenVidu(object):
 
         :return: true if the Session status has changed with respect to the server, false if not. This applies to any property or sub-property of the object.
         """
-        with self._lock:
-            r = self._session.get("sessions")
-            r.raise_for_status()
-            new_data = r.json()['content']
 
-            data_changed = new_data != self._last_fetch_result
-            self._last_fetch_result = new_data
+        r = self._session.get("sessions")
+        r.raise_for_status()
+        new_data = r.json()['content']
 
-            if data_changed:
-                self._openvidu_sessions = {}
+        data_changed = new_data != self._last_fetch_result
+        self._last_fetch_result = new_data
 
-                # update, create valid streams
-                for session_data in new_data:
-                    session_id = session_data['id']
-                    self._openvidu_sessions[session_id] = OpenViduSession(self._session, session_data)
+        if data_changed:
+            self._openvidu_sessions = {}
 
-            return data_changed
+            # update, create valid streams
+            for session_data in new_data:
+                session_id = session_data['id']
+                self._openvidu_sessions[session_id] = OpenViduSession(self._session, session_data)
+
+        return data_changed
+
 
     def get_session(self, session_id: str) -> OpenViduSession:
         """
@@ -72,16 +70,16 @@ class OpenVidu(object):
         :param session_id: The ID of the session to acquire.
         :return: An OpenViduSession object.
         """
-        with self._lock:
-            if session_id not in self._openvidu_sessions:
-                raise OpenViduSessionDoesNotExistsError()
+        if session_id not in self._openvidu_sessions:
+            raise OpenViduSessionDoesNotExistsError()
 
-            session = self._openvidu_sessions[session_id]
+        session = self._openvidu_sessions[session_id]
 
-            if not session.is_valid:
-                raise OpenViduSessionDoesNotExistsError()
+        if not session.is_valid:
+            raise OpenViduSessionDoesNotExistsError()
 
-            return session
+        return session
+
 
     def create_session(self, custom_session_id: str = None, media_mode: str = None) -> OpenViduSession:
         """
@@ -95,29 +93,29 @@ class OpenVidu(object):
         :param media_mode: ROUTED (default) or RELAYED
         :return: The created OpenViduSession instance.
         """
-        with self._lock:
-            # Prepare parameters
-            if media_mode not in ['ROUTED', 'RELAYED', None]:
-                raise ValueError(f"media_mode must be any of ROUTED or RELAYED, not {media_mode}")
+        # Prepare parameters
+        if media_mode not in ['ROUTED', 'RELAYED', None]:
+            raise ValueError(f"media_mode must be any of ROUTED or RELAYED, not {media_mode}")
 
-            parameters = {"mediaMode": media_mode, "customSessionId": custom_session_id}
-            parameters = {k: v for k, v in parameters.items() if v is not None}
+        parameters = {"mediaMode": media_mode, "customSessionId": custom_session_id}
+        parameters = {k: v for k, v in parameters.items() if v is not None}
 
-            # send request
-            r = self._session.post('sessions', json=parameters)
+        # send request
+        r = self._session.post('sessions', json=parameters)
 
-            if r.status_code == 409:
-                raise OpenViduSessionExistsError()
-            elif r.status_code == 400:
-                raise ValueError()
+        if r.status_code == 409:
+            raise OpenViduSessionExistsError()
+        elif r.status_code == 400:
+            raise ValueError()
 
-            r.raise_for_status()
+        r.raise_for_status()
 
-            # As of OpenVidu 2.16.0 the server returns the created session object
-            new_session = OpenViduSession(self._session, r.json())
-            self._openvidu_sessions[new_session.id] = new_session
+        # As of OpenVidu 2.16.0 the server returns the created session object
+        new_session = OpenViduSession(self._session, r.json())
+        self._openvidu_sessions[new_session.id] = new_session
 
-            return new_session
+        return new_session
+
 
     @property
     def sessions(self) -> List[OpenViduSession]:
@@ -126,10 +124,10 @@ class OpenVidu(object):
 
         :return: A list of OpenViduSession objects.
         """
-        with self._lock:
-            return [
-                sess for sess in self._openvidu_sessions.values() if sess.is_valid
-            ]  # yeah... the fetch() hell just begun
+        return [
+            sess for sess in self._openvidu_sessions.values() if sess.is_valid
+        ]
+
 
     @property
     def session_count(self) -> int:
@@ -138,8 +136,8 @@ class OpenVidu(object):
 
         :return: The number of active sessions.
         """
-        with self._lock:
-            return len(self.sessions)
+        return len(self.sessions)
+
 
     def get_config(self) -> dict:
         """
