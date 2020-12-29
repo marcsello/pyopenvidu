@@ -240,77 +240,129 @@ def test_ipcam_connection_is_valid_true(webrtc_connection_instance):
     assert webrtc_connection_instance.is_valid
 
 
-def test_properties(webrtc_connection_instance):
-    assert webrtc_connection_instance.session_id == SESSIONS['content'][0]['id']
+def test_webrtc_connection_properties(webrtc_connection_instance):
+    # Common part
+
     assert webrtc_connection_instance.id == SESSIONS['content'][0]['connections']['content'][0]['id']
+    assert webrtc_connection_instance.session_id == SESSIONS['content'][0]['id']
+    assert webrtc_connection_instance.type == "WEBRTC"
 
     assert webrtc_connection_instance.created_at == datetime.utcfromtimestamp(
         SESSIONS['content'][0]['connections']['content'][0]['createdAt'] / 1000.0
     )
+
+    assert webrtc_connection_instance.active_at == datetime.utcfromtimestamp(
+        SESSIONS['content'][0]['connections']['content'][0]['activeAt'] / 1000.0
+    )
+
+    assert webrtc_connection_instance.platform == SESSIONS['content'][0]['connections']['content'][0]['platform']
+    assert webrtc_connection_instance.server_data == SESSIONS['content'][0]['connections']['content'][0]['serverData']
+
+    assert webrtc_connection_instance.publisher_count == len(
+        SESSIONS['content'][0]['connections']['content'][0]['publishers']
+    )
+
+    assert webrtc_connection_instance.subscriber_count == len(
+        SESSIONS['content'][0]['connections']['content'][0]['subscribers']
+    )
+
+    assert len(webrtc_connection_instance.publishers) == len(
+        SESSIONS['content'][0]['connections']['content'][0]['publishers']
+    )
+
+    assert len(webrtc_connection_instance.subscribers) == len(
+        SESSIONS['content'][0]['connections']['content'][0]['subscribers']
+    )
+
+    # WEBRTC specific part
 
     assert webrtc_connection_instance.token == SESSIONS['content'][0]['connections']['content'][0]['token']
     assert webrtc_connection_instance.client_data == SESSIONS['content'][0]['connections']['content'][0]['clientData']
-    assert webrtc_connection_instance.server_data == SESSIONS['content'][0]['connections']['content'][0]['serverData']
-    assert webrtc_connection_instance.platform == SESSIONS['content'][0]['connections']['content'][0]['platform']
     assert webrtc_connection_instance.role == SESSIONS['content'][0]['connections']['content'][0]['role']
 
-    assert webrtc_connection_instance.publisher_count == len(
-        SESSIONS['content'][0]['connections']['content'][0]['publishers'])
-    assert webrtc_connection_instance.subscriber_count == len(
-        SESSIONS['content'][0]['connections']['content'][0]['subscribers']
-    )
+    assert webrtc_connection_instance.kurento_options == \
+           SESSIONS['content'][0]['connections']['content'][0]['kurentoOptions']
 
-    assert len(webrtc_connection_instance.publishers) == len(
-        SESSIONS['content'][0]['connections']['content'][0]['publishers'])
+    # IPCAM only fields
+
+    with pytest.raises(AttributeError):
+        webrtc_connection_instance.rtsp_uri
+
+    with pytest.raises(AttributeError):
+        webrtc_connection_instance.adaptive_bitrate
+
+    with pytest.raises(AttributeError):
+        webrtc_connection_instance.only_play_with_subscribers
+
+    with pytest.raises(AttributeError):
+        webrtc_connection_instance.network_cache
 
 
-def test_properties_none_fields(session_instance):
+def test_webrtc_connection_none_fields(session_instance):
     webrtc_connection_instance = session_instance.get_connection(
         SESSIONS['content'][0]['connections']['content'][1]['id'])
 
-    assert webrtc_connection_instance.session_id == SESSIONS['content'][0]['id']
-    assert webrtc_connection_instance.id == SESSIONS['content'][0]['connections']['content'][1]['id']
-
-    assert webrtc_connection_instance.created_at == datetime.utcfromtimestamp(
-        SESSIONS['content'][0]['connections']['content'][0]['createdAt'] / 1000.0
-    )
-
-    assert webrtc_connection_instance.token == SESSIONS['content'][0]['connections']['content'][1]['token']
     assert webrtc_connection_instance.client_data is None
     assert webrtc_connection_instance.server_data is None
-    assert webrtc_connection_instance.platform == SESSIONS['content'][0]['connections']['content'][1]['platform']
-    assert webrtc_connection_instance.role == SESSIONS['content'][0]['connections']['content'][1]['role']
-
-    assert webrtc_connection_instance.publisher_count == len(
-        SESSIONS['content'][0]['connections']['content'][0]['publishers'])
-    assert webrtc_connection_instance.subscriber_count == len(
-        SESSIONS['content'][0]['connections']['content'][0]['subscribers']
-    )
-
-    assert len(webrtc_connection_instance.publishers) == len(
-        SESSIONS['content'][0]['connections']['content'][1]['publishers'])
 
 
-def test_properties_ipcam_fields(openvidu_instance):
-    session_instance = openvidu_instance.get_session(SESSIONS['content'][1]['id'])
-    webrtc_connection_instance = session_instance.get_connection(
-        SESSIONS['content'][1]['connections']['content'][0]['id'])
+def test_ipcam_connection_properties(ipcam_connection_instance):
+    # Common part
 
-    assert webrtc_connection_instance.session_id == SESSIONS['content'][1]['id']
-    assert webrtc_connection_instance.id == SESSIONS['content'][1]['connections']['content'][0]['id']
+    assert ipcam_connection_instance.id == SESSIONS['content'][1]['connections']['content'][0]['id']
+    assert ipcam_connection_instance.session_id == SESSIONS['content'][1]['id']
+    assert ipcam_connection_instance.type == "IPCAM"
 
-    assert webrtc_connection_instance.created_at == datetime.utcfromtimestamp(
+    assert ipcam_connection_instance.created_at == datetime.utcfromtimestamp(
         SESSIONS['content'][1]['connections']['content'][0]['createdAt'] / 1000.0
     )
 
-    assert webrtc_connection_instance.server_data == SESSIONS['content'][1]['connections']['content'][0]['serverData']
-    assert webrtc_connection_instance.platform == SESSIONS['content'][1]['connections']['content'][0]['platform']
+    assert ipcam_connection_instance.active_at == datetime.utcfromtimestamp(
+        SESSIONS['content'][1]['connections']['content'][0]['activeAt'] / 1000.0
+    )
 
-    assert webrtc_connection_instance.publisher_count == len(
-        SESSIONS['content'][1]['connections']['content'][0]['publishers'])
-    assert webrtc_connection_instance.subscriber_count == len(
+    assert ipcam_connection_instance.platform == SESSIONS['content'][1]['connections']['content'][0]['platform']
+    assert ipcam_connection_instance.server_data == SESSIONS['content'][1]['connections']['content'][0]['serverData']
+
+    assert ipcam_connection_instance.publisher_count == len(
+        SESSIONS['content'][1]['connections']['content'][0]['publishers']
+    )
+
+    assert ipcam_connection_instance.subscriber_count == len(
         SESSIONS['content'][1]['connections']['content'][0]['subscribers']
     )
 
-    assert len(webrtc_connection_instance.publishers) == len(
-        SESSIONS['content'][1]['connections']['content'][0]['publishers'])
+    assert len(ipcam_connection_instance.publishers) == len(
+        SESSIONS['content'][1]['connections']['content'][0]['publishers']
+    )
+
+    assert len(ipcam_connection_instance.subscribers) == len(
+        SESSIONS['content'][1]['connections']['content'][0]['subscribers']
+    )
+
+    # IPCAM specific part
+
+    assert ipcam_connection_instance.rtsp_uri == SESSIONS['content'][1]['connections']['content'][0]['rtspUri']
+
+    assert ipcam_connection_instance.adaptive_bitrate == \
+           SESSIONS['content'][1]['connections']['content'][0]['adaptativeBitrate']
+
+    assert ipcam_connection_instance.only_play_with_subscribers == \
+           SESSIONS['content'][1]['connections']['content'][0]['onlyPlayWithSubscribers']
+
+    assert ipcam_connection_instance.network_cache == SESSIONS['content'][1]['connections']['content'][0][
+        'networkCache']
+
+    # WEBRTC only fields
+
+    with pytest.raises(AttributeError):
+        ipcam_connection_instance.token
+
+    with pytest.raises(AttributeError):
+        ipcam_connection_instance.client_data
+
+    with pytest.raises(AttributeError):
+        ipcam_connection_instance.role
+
+    with pytest.raises(AttributeError):
+        ipcam_connection_instance.kurento_options
