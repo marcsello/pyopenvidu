@@ -12,8 +12,8 @@ from .fixtures import SESSIONS
 #
 
 
-def test_properties(connection_instance):
-    s = connection_instance.subscribers[0]
+def test_properties(webrtc_connection_instance):
+    s = webrtc_connection_instance.subscribers[0]
 
     assert s.session_id == SESSIONS['content'][0]['id']
     assert s.stream_id == SESSIONS['content'][0]['connections']['content'][0]['subscribers'][0]['streamId']

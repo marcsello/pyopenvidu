@@ -193,5 +193,10 @@ def session_instance(openvidu_instance):
 
 
 @pytest.fixture
-def connection_instance(session_instance):
+def webrtc_connection_instance(session_instance):
     yield session_instance.get_connection('vhdxz7abbfirh2lh')
+
+@pytest.fixture
+def ipcam_connection_instance(openvidu_instance):
+    session_instance = openvidu_instance.get_session('TestSession2')
+    yield session_instance.get_connection('ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp')

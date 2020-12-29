@@ -95,6 +95,19 @@ def test_session_new_webrtc_connection_extra(session_instance, requests_mock):
     }
 
 
+def test_session_fetch_connection_invalid_type(session_instance, requests_mock):
+    NEW_SESSIONS = deepcopy(SESSIONS)
+
+    NEW_SESSIONS['content'][0]['connections']['content'][0]['type'] = "abc"
+
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json=NEW_SESSIONS['content'][0])
+
+    with pytest.raises(RuntimeError):
+        session_instance.fetch()
+
+    assert a.called_once
+
+
 def test_session_new_webrtc_connection_validation_error(session_instance):
     with pytest.raises(ValueError):
         session_instance.create_webrtc_connection(role='abc')
