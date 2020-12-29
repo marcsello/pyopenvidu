@@ -131,7 +131,6 @@ class OpenViduConnection(object):
             self.is_valid = False
             raise OpenViduSessionDoesNotExistsError()
         elif r.status_code == 400:
-            self.is_valid = False
             raise ValueError()
         elif r.status_code == 406:
             self.is_valid = False

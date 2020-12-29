@@ -142,10 +142,12 @@ class OpenViduSession(object):
         r = self._session.post('signal', json=parameters)
 
         if r.status_code == 404:
+            self.is_valid = False
             raise OpenViduSessionDoesNotExistsError()
         elif r.status_code == 400:
             raise ValueError()
         elif r.status_code == 406:
+            self.is_valid = False
             raise OpenViduConnectionDoesNotExistsError()
 
         r.raise_for_status()
@@ -154,6 +156,7 @@ class OpenViduSession(object):
         r = self._session.post(f'sessions/{self.id}/connection', json=parameters)
 
         if r.status_code == 404:
+            self.is_valid = False
             raise OpenViduSessionDoesNotExistsError()
         elif r.status_code == 400:
             raise ValueError()
