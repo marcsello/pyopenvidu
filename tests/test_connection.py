@@ -118,6 +118,7 @@ def test_disconnection_failed_no_connection(webrtc_connection_instance, requests
         webrtc_connection_instance.force_disconnect()
 
     assert a.called_once
+    assert not webrtc_connection_instance.is_valid
 
 
 def test_disconnection_failed_no_connection_early(webrtc_connection_instance, requests_mock):
@@ -139,6 +140,7 @@ def test_disconnection_failed_no_session(webrtc_connection_instance, requests_mo
         webrtc_connection_instance.force_disconnect()
 
     assert a.called_once
+    assert not webrtc_connection_instance.is_valid
 
 
 #
@@ -167,6 +169,7 @@ def test_signal_value_error(webrtc_connection_instance, requests_mock):
         webrtc_connection_instance.signal('MY_TYPE', "Hello world!")
 
     assert a.called_once
+    assert webrtc_connection_instance.is_valid  # It was user error, the session should be still valid
 
 
 def test_signal_no_session(webrtc_connection_instance, requests_mock):
@@ -176,6 +179,7 @@ def test_signal_no_session(webrtc_connection_instance, requests_mock):
         webrtc_connection_instance.signal('MY_TYPE', "Hello world!")
 
     assert a.called_once
+    assert not webrtc_connection_instance.is_valid
 
 
 def test_signal_no_connection(webrtc_connection_instance, requests_mock):
@@ -185,6 +189,7 @@ def test_signal_no_connection(webrtc_connection_instance, requests_mock):
         webrtc_connection_instance.signal('MY_TYPE', "Hello world!")
 
     assert a.called_once
+    assert not webrtc_connection_instance.is_valid
 
 
 def test_signal_no_connection_early(webrtc_connection_instance, requests_mock):
@@ -226,6 +231,14 @@ def test_force_unpublish_all_no_connection_early(webrtc_connection_instance, req
 #
 # Properties
 #
+
+def test_webrtc_connection_is_valid_true(webrtc_connection_instance):
+    assert webrtc_connection_instance.is_valid
+
+
+def test_ipcam_connection_is_valid_true(webrtc_connection_instance):
+    assert webrtc_connection_instance.is_valid
+
 
 def test_properties(webrtc_connection_instance):
     assert webrtc_connection_instance.session_id == SESSIONS['content'][0]['id']

@@ -106,11 +106,14 @@ def test_session_fetch_connection_invalid_type(session_instance, requests_mock):
         session_instance.fetch()
 
     assert a.called_once
+    assert session_instance.is_valid  # This is undefined behaviour
 
 
 def test_session_new_webrtc_connection_validation_error(session_instance):
     with pytest.raises(ValueError):
         session_instance.create_webrtc_connection(role='abc')
+
+    assert session_instance.is_valid  # user error
 
 
 def test_session_new_webrtc_connection_invalid_session_early(session_instance):
@@ -127,6 +130,7 @@ def test_session_new_webrtc_connection_missing_session(session_instance, request
         session_instance.create_webrtc_connection()
 
     assert a.called_once
+    assert not session_instance.is_valid
 
 
 def test_session_new_webrtc_connection_serverside_validation_error(session_instance, requests_mock):
@@ -136,6 +140,7 @@ def test_session_new_webrtc_connection_serverside_validation_error(session_insta
         session_instance.create_webrtc_connection()
 
     assert a.called_once
+    assert session_instance.is_valid  # user error it was
 
 
 #
@@ -183,11 +188,13 @@ def test_missing_connection(session_instance):
     with pytest.raises(OpenViduConnectionDoesNotExistsError):
         session_instance.get_connection('abc')
 
+    assert session_instance.is_valid  # meh
+
 
 def test_connection_invalid_session_early(session_instance):
     session_instance.is_valid = False
 
-    #no exception should be raised
+    # no exception should be raised
     session_instance.get_connection('vhdxz7abbfirh2lh')
 
 
@@ -247,6 +254,7 @@ def test_signal_value_error(session_instance, requests_mock):
         session_instance.signal('MY_TYPE', "Hello world!")
 
     assert a.called_once
+    assert session_instance.is_valid  # user meme
 
 
 def test_signal_no_session(session_instance, requests_mock):
@@ -256,16 +264,13 @@ def test_signal_no_session(session_instance, requests_mock):
         session_instance.signal('MY_TYPE', "Hello world!")
 
     assert a.called_once
+    assert not session_instance.is_valid
 
 
-def test_signal_early_no_session(session_instance, requests_mock):
+def test_signal_no_session_early(session_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'signal'), status_code=404)
-    b = requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), json={}, status_code=404)
 
-    with pytest.raises(OpenViduSessionDoesNotExistsError):
-        session_instance.fetch()
-
-    assert b.called_once
+    session_instance.is_valid = False
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         session_instance.signal('MY_TYPE', "Hello world!")
@@ -280,6 +285,7 @@ def test_signal_no_connection(session_instance, requests_mock):
         session_instance.signal('MY_TYPE', "Hello world!")
 
     assert a.called_once
+    assert not session_instance.is_valid
 
 
 #
@@ -414,6 +420,7 @@ def test_session_new_ipcam_connection_invalid_session(session_instance, requests
         session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
     assert a.called_once
+    assert not session_instance.is_valid
 
 
 def test_session_new_ipcam_connection_value_error(session_instance, requests_mock):
@@ -423,6 +430,7 @@ def test_session_new_ipcam_connection_value_error(session_instance, requests_moc
         session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
     assert a.called_once
+    assert session_instance.is_valid  # user meme
 
 
 def test_session_new_ipcam_connection_server_error(session_instance, requests_mock):
@@ -432,6 +440,7 @@ def test_session_new_ipcam_connection_server_error(session_instance, requests_mo
         session_instance.create_ipcam_connection("rtsp://91.191.213.50:554/live_mpeg4.sdp")
 
     assert a.called_once
+    assert session_instance.is_valid  # It might be valid but the server is borked or something
 
 
 #
