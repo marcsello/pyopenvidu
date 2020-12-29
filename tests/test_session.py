@@ -324,11 +324,7 @@ def test_session_new_ipcam_connection(session_instance, requests_mock):
 
     assert a.last_request.json() == {
         "type": "IPCAM",
-        "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp",
-        "adaptativeBitrate": True,
-        "onlyPlayWithSubscribers": True,
-        "data": '',
-        "networkCache": 2000
+        "rtspUri": "rtsp://91.191.213.50:554/live_mpeg4.sdp"
     }
 
     assert a.called_once
@@ -378,7 +374,9 @@ def test_session_new_ipcam_connection_extra(session_instance, requests_mock):
     new_connection = session_instance.create_ipcam_connection(
         "rtsp://91.191.213.50:554/live_mpeg4.sdp",
         "TEST_DATA",
-        adaptive_bitrate=False
+        adaptive_bitrate=False,
+        only_play_with_subscribers=True,
+        network_cache=1
     )
 
     assert a.last_request.json() == {
@@ -387,7 +385,7 @@ def test_session_new_ipcam_connection_extra(session_instance, requests_mock):
         "adaptativeBitrate": False,
         "onlyPlayWithSubscribers": True,
         "data": 'TEST_DATA',
-        "networkCache": 2000
+        "networkCache": 1
     }
 
     assert a.called_once

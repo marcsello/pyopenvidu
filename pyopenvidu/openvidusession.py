@@ -220,9 +220,9 @@ class OpenViduSession(object):
         self.connections.append(new_connection)
         return new_connection
 
-    def create_ipcam_connection(self, rtsp_uri: str, data: str = '', adaptive_bitrate: bool = True,
-                                only_play_with_subscribers: bool = True,
-                                network_cache: int = 2000) -> OpenViduIPCAMConnection:
+    def create_ipcam_connection(self, rtsp_uri: str, data: str = None, adaptive_bitrate: bool = None,
+                                only_play_with_subscribers: bool = None,
+                                network_cache: int = None) -> OpenViduIPCAMConnection:
         """
         Publishes a new IPCAM rtsp stream to the session.
 
@@ -250,6 +250,8 @@ class OpenViduSession(object):
             "onlyPlayWithSubscribers": only_play_with_subscribers,
             "networkCache": network_cache
         }
+
+        parameters = {k: v for k, v in parameters.items() if v is not None}
 
         response = self.__create_connection(parameters)
         new_connection = OpenViduIPCAMConnection(self._session, response)
