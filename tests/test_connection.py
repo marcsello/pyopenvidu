@@ -108,6 +108,7 @@ def test_disconnection(webrtc_connection_instance, requests_mock):
     webrtc_connection_instance.force_disconnect()
 
     assert a.called_once
+    assert not webrtc_connection_instance.is_valid
 
 
 def test_disconnection_failed_no_connection(webrtc_connection_instance, requests_mock):

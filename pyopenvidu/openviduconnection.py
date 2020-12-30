@@ -118,6 +118,7 @@ class OpenViduConnection(object):
             raise OpenViduSessionDoesNotExistsError()
 
         r.raise_for_status()
+        self.is_valid = False
 
     def signal(self, type_: str = None, data: str = None):
         """
