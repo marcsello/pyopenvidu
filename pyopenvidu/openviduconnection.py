@@ -19,7 +19,7 @@ class OpenViduConnection(object):
     type: str
     session_id: str
     created_at: datetime
-    active_at: datetime
+    active_at: Optional[datetime]
     platform: str
     server_data: Optional[str]
     publishers: List[OpenViduPublisher]
@@ -32,19 +32,26 @@ class OpenViduConnection(object):
         self.type = data['type']  # Either IPCAM or WEBRTC
         self.session_id = data['sessionId']
         self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)
-        self.active_at = datetime.utcfromtimestamp(data['activeAt'] / 1000.0)
+
+        if data['activeAt']:
+            self.active_at = datetime.utcfromtimestamp(data['activeAt'] / 1000.0)
+        else:
+            self.active_at = None
+
         self.platform = data['platform']
         self.server_data = data.get('serverData', None)
 
         # set publishers
         publishers = []
-        for publisher_data in data['publishers']:
-            publishers.append(OpenViduPublisher(self._session, self.session_id, publisher_data))
+        if data['publishers']:  # For some reason... this can be none
+            for publisher_data in data['publishers']:
+                publishers.append(OpenViduPublisher(self._session, self.session_id, publisher_data))
 
         # set subscribers
         subscribers = []
-        for subscriber_data in data['subscribers']:
-            subscribers.append(OpenViduSubscriber(self._session, self.session_id, subscriber_data))
+        if data['subscribers']:  # For some reason... this can be none
+            for subscriber_data in data['subscribers']:
+                subscribers.append(OpenViduSubscriber(self._session, self.session_id, subscriber_data))
 
         self.publishers = publishers
         self.subscribers = subscribers

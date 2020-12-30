@@ -300,10 +300,13 @@ def test_webrtc_connection_properties(webrtc_connection_instance):
 
 def test_webrtc_connection_none_fields(session_instance):
     webrtc_connection_instance = session_instance.get_connection(
-        SESSIONS['content'][0]['connections']['content'][1]['id'])
+        SESSIONS['content'][0]['connections']['content'][2]['id'])
 
+    assert webrtc_connection_instance.active_at is None
     assert webrtc_connection_instance.client_data is None
     assert webrtc_connection_instance.server_data is None
+    assert len(webrtc_connection_instance.publishers) == 0
+    assert len(webrtc_connection_instance.subscribers) == 0
 
 
 def test_ipcam_connection_properties(ipcam_connection_instance):

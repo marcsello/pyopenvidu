@@ -19,7 +19,7 @@ SESSIONS = {
             "defaultCustomLayout": "",
             "customSessionId": "TestSession",
             "connections": {
-                "numberOfElements": 2,
+                "numberOfElements": 3,
                 "content": [
                     {
                         "id": "vhdxz7abbfirh2lh",
@@ -116,6 +116,34 @@ SESSIONS = {
                                 "createdAt": 1538482000856
                             }
                         ]
+                    },
+                    {
+                        "id": "unconnectedconnection",
+                        "object": "connection",
+                        "type": "WEBRTC",
+                        "status": "active",
+                        "sessionId": "TestSession",
+                        "createdAt": 1538481999022,
+                        "activeAt": None,
+                        "location": "",
+                        "platform": "Chrome 69.0.4183.102 on Linux 64-bit",
+                        "token": "wss://localhost:4443?sessionId=TestSession&token=tok_AVe8o7iltWqtijyl&role=PUBLISHER&version=2.16.0&coturnIp=localhost&turnUsername=M2ALIY&turnCredential=7kfjy2",
+                        "serverData": None,
+                        "clientData": None,
+                        "record": False,
+                        "role": "PUBLISHER",
+                        "kurentoOptions": {
+                            "videoMaxRecvBandwidth": 1000,
+                            "videoMinRecvBandwidth": 300,
+                            "videoMaxSendBandwidth": 1000,
+                            "videoMinSendBandwidth": 300,
+                            "allowedFilters": [
+                                "GStreamerFilter",
+                                "ZBarFilter"
+                            ]
+                        },
+                        "publishers": None,
+                        "subscribers": None
                     }
 
                 ]
@@ -195,6 +223,7 @@ def session_instance(openvidu_instance):
 @pytest.fixture
 def webrtc_connection_instance(session_instance):
     yield session_instance.get_connection('vhdxz7abbfirh2lh')
+
 
 @pytest.fixture
 def ipcam_connection_instance(openvidu_instance):
