@@ -10,6 +10,7 @@ Welcome to PyOpenVidu's documentation!
    examples
    fetching
    advanced
+   migrating
    source/classes
    contributing
    authors
