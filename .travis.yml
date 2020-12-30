@@ -10,7 +10,7 @@ branches:
   only:
   - master
   - dev
-  - /v\d+\.\d+[a-z]/
+  - \d+\.\d+.\d+[a-z]
 
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
