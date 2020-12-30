@@ -40,7 +40,7 @@ class OpenVidu(object):
 
     def fetch(self) -> bool:
         """
-        Updates every property of every active Session with the current status they have in OpenVidu Server. After calling this method you can access the updated list of active sessions by calling get_sessions()
+        Updates every property of every active Session with the current status they have in OpenVidu Server. After calling this method you can access the updated list of active sessions trough the `sessions` property.
 
         :return: true if the Session status has changed with respect to the server, false if not. This applies to any property or sub-property of the object.
         """

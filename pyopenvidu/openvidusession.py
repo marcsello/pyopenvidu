@@ -57,8 +57,7 @@ class OpenViduSession(object):
 
     def fetch(self):
         """
-        Updates every property of the OpenViduSession with the current status it has in OpenVidu Server. This is especially useful for getting the list of active connections to the OpenViduSession (get_connections()).
-        To update every OpenViduSession object owned by OpenVidu object, call OpenVidu.fetch()
+        Updates every property of the OpenViduSession with the current status it has in OpenVidu Server. This is especially useful for getting the list of active connections to the OpenViduSession trough the `connections` property.
 
         :return: True if the OpenViduSession status has changed with respect to the server, False if not. This applies to any property or sub-property of the object
         """

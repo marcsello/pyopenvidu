@@ -11,6 +11,10 @@ from .openvidusubscriber import OpenViduSubscriber
 # Notice: Frozen should be changed to True in later versions of Python3 where a nice method for custom initializer is implemented
 @dataclass(init=False, frozen=False)
 class OpenViduConnection(object):
+    """
+    This is a base class for connection objects.
+    """
+
     id: str
     type: str
     session_id: str
@@ -59,6 +63,11 @@ class OpenViduConnection(object):
         self._last_fetch_result = data
 
     def fetch(self) -> bool:
+        """
+        Updates every property of the connection object.
+
+        :return: true if the Connection object status has changed with respect to the server, false if not. This applies to any property or sub-property of the object.
+        """
 
         if not self.is_valid:
             raise OpenViduConnectionDoesNotExistsError()
