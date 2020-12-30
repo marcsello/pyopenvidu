@@ -13,9 +13,9 @@ Create a session::
 
 Generate a token a session::
 
-    token = session.generate_token()
+    token = session.create_webrtc_connection().token
 
-Fetch session information::
+Fetch information::
 
     # Fetch all session info from OpenVidu Server
     openvidu.fetch()
@@ -24,6 +24,10 @@ Fetch session information::
     # Fetch a specific session info from the server
     session.fetch()
     connections = session.connections
+
+    # Fetch a specific connection info from the server
+    connection.fetch()
+    subs = connection.subscribers
 
 
 Send signals::
@@ -41,7 +45,7 @@ Send signals::
 
 Connect to IP camera::
 
-    session.publish("rtsp://mydomain.net:1935/live/stream")
+    session.create_ipcam_connection("rtsp://mydomain.net:1935/live/stream")
 
 Close a session::
 
@@ -64,7 +68,7 @@ Force disconnect users::
 Force unpublish an user's streams::
 
     # Unpublish a single stream (most of the time there is only one, except when sharing screen):
-    for stream in session.get_connection("vhdxz7abbfirh2lh").
+    session.get_connection("vhdxz7abbfirh2lh").publishers[0].force_unpublish()
 
     # Unpublish all streams of an user:
     session.get_connection("vhdxz7abbfirh2lh").force_unpublish_all_streams()

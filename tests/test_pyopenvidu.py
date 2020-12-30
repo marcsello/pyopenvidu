@@ -7,79 +7,11 @@ import requests.exceptions
 from pyopenvidu import OpenVidu, OpenViduSessionDoesNotExistsError, OpenViduSessionExistsError
 from urllib.parse import urljoin
 from copy import deepcopy
-
-URL_BASE = 'http://test.openvidu.io:4443/'
-SESSIONS = {"numberOfElements": 2, "content": [
-    {"sessionId": "TestSession", "createdAt": 1538482606338, "mediaMode": "ROUTED", "recordingMode": "MANUAL",
-     "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT", "customSessionId": "TestSession",
-     "connections": {"numberOfElements": 3, "content": [
-         {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
-          "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-          "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
-          "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
-             {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-              "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
-                               "typeOfVideo": "CAMERA", "frameRate": 30,
-                               "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
-          "subscribers": []},
-         {"connectionId": "maxawd3ysuj1rxvq", "createdAt": 1538482607659, "location": "",
-          "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-          "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
-          "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
-          "subscribers": [
-              {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"
-               }
-          ]},
-         {"connectionId": "maxawc4zsuj1rxva", "createdAt": 1538482607659, "location": "",
-          "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-          "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
-          "role": "PUBLISHER", "publishers": [],
-          "subscribers": [
-              {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"
-               }
-          ]},
-     ]}, "recording": False},
-    {"sessionId": "TestSession2", "createdAt": 1538482606338, "mediaMode": "ROUTED", "recordingMode": "MANUAL",
-     "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT", "customSessionId": "TestSession",
-     "connections": {"numberOfElements": 3, "content": [
-         {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
-          "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-          "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
-          "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
-             {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-              "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
-                               "typeOfVideo": "CAMERA", "frameRate": 30,
-                               "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
-          "subscribers": []}, {"connectionId": "maxawd3ysuj1rxvq", "createdAt": 1538482607659, "location": "",
-                               "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-                               "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
-                               "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
-                               "subscribers": [
-                                   {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU"}]},
-         {"connectionId": "ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp", "createdAt": 1582121476379,
-          "location": "unknown", "platform": "IPCAM", "role": "PUBLISHER", "serverData": "MY_IP_CAMERA", "publishers": [
-             {"createdAt": 1582121476439,
-              "streamId": "str_IPC_XC1W_ipc_IPCAM_rtsp_A8MJ_91_191_213_49_554_live_mpeg4_sdp",
-              "rtspUri": "rtsp://91.191.213.49:554/live_mpeg4.sdp",
-              "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
-                               "typeOfVideo": "IPCAM", "frameRate": None, "videoDimensions": None, "filter": {},
-                               "adaptativeBitrate": True, "onlyPlayWithSubscribers": True}}], "subscribers": []}
-
-     ]},
-     "recording": False}
-]}
-
-SECRET = 'MY_SECRET'
+from .fixtures import URL_BASE, SESSIONS, SECRET
 
 
 @pytest.fixture
-def openvidu_instance(requests_mock):
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=SESSIONS)
-    yield OpenVidu(URL_BASE, SECRET)
-
-
-@pytest.fixture
-def no_fetch_openvidu_instance(requests_mock):
+def no_fetch_openvidu_instance():
     yield OpenVidu(URL_BASE, SECRET, initial_fetch=False)
 
 
@@ -88,22 +20,41 @@ def no_fetch_openvidu_instance(requests_mock):
 #
 
 def test_get_config(openvidu_instance, requests_mock):
-    original = {"version": "2.9.0", "openviduPublicurl": URL_BASE, "openviduCdr": False,
-                "maxRecvBandwidth": 1000, "minRecvBandwidth": 300, "maxSendBandwidth": 1000, "minSendBandwidth": 300,
-                "openviduRecording": True, "openviduRecordingVersion": "2.8.0",
-                "openviduRecordingPath": "/opt/openvidu/recordings/", "openviduRecordingPublicAccess": True,
-                "openviduRecordingNotification": "publisher_moderator",
-                "openviduRecordingCustomLayout": "/opt/openvidu/custom-layout/",
-                "openviduRecordingAutostopTimeout": 120, "openviduWebhook": True,
-                "openviduWebhookEndpoint": "http://localhost:7777/webhook/",
-                "openviduWebhookHeaders": ["Authorization: Basic YWJjZDphYmNk"],
-                "openviduWebhookEvents": ["recordingStatusChanged"]}
+    original = {
+        "VERSION": "2.16.0",
+        "DOMAIN_OR_PUBLIC_IP": "my.openvidu.ip",
+        "HTTPS_PORT": 443,
+        "OPENVIDU_PUBLICURL": "https://my.openvidu.ip",
+        "OPENVIDU_CDR": False,
+        "OPENVIDU_STREAMS_VIDEO_MAX_RECV_BANDWIDTH": 1000,
+        "OPENVIDU_STREAMS_VIDEO_MIN_RECV_BANDWIDTH": 300,
+        "OPENVIDU_STREAMS_VIDEO_MAX_SEND_BANDWIDTH": 1000,
+        "OPENVIDU_STREAMS_VIDEO_MIN_SEND_BANDWIDTH": 300,
+        "OPENVIDU_SESSIONS_GARBAGE_INTERVAL": 900,
+        "OPENVIDU_SESSIONS_GARBAGE_THRESHOLD": 3600,
+        "OPENVIDU_RECORDING": True,
+        "OPENVIDU_RECORDING_VERSION": "2.16.0",
+        "OPENVIDU_RECORDING_PATH": "/opt/openvidu/recordings/",
+        "OPENVIDU_RECORDING_PUBLIC_ACCESS": False,
+        "OPENVIDU_RECORDING_NOTIFICATION": "moderator",
+        "OPENVIDU_RECORDING_CUSTOM_LAYOUT": "/opt/openvidu/custom-layout/",
+        "OPENVIDU_RECORDING_AUTOSTOP_TIMEOUT": 60,
+        "OPENVIDU_WEBHOOK": True,
+        "OPENVIDU_WEBHOOK_ENDPOINT": "http://my.webhook.endpoint:7777/webhook",
+        "OPENVIDU_WEBHOOK_HEADERS": [],
+        "OPENVIDU_WEBHOOK_EVENTS": [
+            "sessionCreated",
+            "sessionDestroyed",
+            "recordingStatusChanged"
+        ]
+    }
 
-    requests_mock.get(urljoin(URL_BASE, 'config'), json=original)
+    a = requests_mock.get(urljoin(URL_BASE, 'config'), json=original)
 
-    a = openvidu_instance.get_config()
+    recieved_cfg = openvidu_instance.get_config()
 
-    assert a == original
+    assert a.called_once
+    assert recieved_cfg == original
 
 
 #
@@ -124,79 +75,97 @@ def test_session_count(openvidu_instance):
 
 
 def test_create_session(openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'),
-                           json={"id": "zfgmthb8jl9uellk", "createdAt": 1538481996019})
+    new_session = {
+        "id": "TestSession3",
+        "object": "session",
+        "createdAt": 1538481996019,
+        "mediaMode": "ROUTED",
+        "recordingMode": "MANUAL",
+        "defaultOutputMode": "COMPOSED",
+        "defaultRecordingLayout": "CUSTOM",
+        "defaultCustomLayout": "",
+        "customSessionId": "TestSession3",
+        "connections": {
+            "numberOfElements": 0,
+            "content": []
+        },
+        "recording": False
+    }
+
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json=new_session)
 
     NEW_SESSIONS = deepcopy(SESSIONS)
-    NEW_SESSIONS['content'].append({"sessionId": "zfgmthb8jl9uellk",
-                                    "createdAt": 1538481996019,
-                                    "mediaMode": "ROUTED",
-                                    "recordingMode": "MANUAL",
-                                    "defaultOutputMode": "COMPOSED",
-                                    "defaultRecordingLayout": "BEST_FIT",
-                                    "customSessionId": "TestSession",
-                                    "connections": {"numberOfElements": 0, "content": []},
-                                    "recording": False})
+    NEW_SESSIONS['content'].append(new_session)
+
     NEW_SESSIONS['numberOfElements'] = len(NEW_SESSIONS['content'])
 
-    b = requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=NEW_SESSIONS)
+    b = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=NEW_SESSIONS)
 
     session = openvidu_instance.create_session()
 
-    assert session.id == "zfgmthb8jl9uellk"
-    assert a.called
-    assert b.called
+    assert session.id == "TestSession3"
+    assert a.called_once
+    assert not b.called  # A subsequent fetch should not be called (since 2.16.0)
 
     assert a.last_request.json() == {}
 
 
 def test_create_session_extra(openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'),
-                           json={"id": "DerpyIsBestPony", "createdAt": 1538481996019})
+    new_session = {
+        "id": "DerpyIsBestPony",
+        "object": "session",
+        "createdAt": 1538481996019,
+        "mediaMode": "RELAYED",
+        "recordingMode": "MANUAL",
+        "defaultOutputMode": "COMPOSED",
+        "defaultRecordingLayout": "CUSTOM",
+        "defaultCustomLayout": "",
+        "customSessionId": "DerpyIsBestPony",
+        "connections": {
+            "numberOfElements": 0,
+            "content": []
+        },
+        "recording": False
+    }
+
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json=new_session)
 
     NEW_SESSIONS = deepcopy(SESSIONS)
-    NEW_SESSIONS['content'].append({"sessionId": "DerpyIsBestPony",
-                                    "createdAt": 1538481996019,
-                                    "mediaMode": "RELAYED",
-                                    "recordingMode": "MANUAL",
-                                    "defaultOutputMode": "COMPOSED",
-                                    "defaultRecordingLayout": "BEST_FIT",
-                                    "customSessionId": "TestSession",
-                                    "connections": {"numberOfElements": 0, "content": []},
-                                    "recording": False})
+    NEW_SESSIONS['content'].append(new_session)
+
     NEW_SESSIONS['numberOfElements'] = len(NEW_SESSIONS['content'])
 
-    b = requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=NEW_SESSIONS)
+    b = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=NEW_SESSIONS)
 
     session = openvidu_instance.create_session('DerpyIsBestPony', 'RELAYED')
 
     assert session.id == "DerpyIsBestPony"
-    assert a.called
-    assert b.called
+    assert a.called_once
+    assert not b.called  # A subsequent fetch should not be called (since 2.16.0)
 
     assert a.last_request.json() == {"mediaMode": 'RELAYED', "customSessionId": 'DerpyIsBestPony'}
 
 
 def test_create_session_conflict(openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'), json={}, status_code=409)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json={}, status_code=409)
 
     with pytest.raises(OpenViduSessionExistsError):
         openvidu_instance.create_session('TestSession')
 
-    assert a.called
+    assert a.called_once
 
 
 def test_create_session_bad_parameters(openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'), json={}, status_code=400)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
         openvidu_instance.create_session()
 
-    assert a.called
+    assert a.called_once
 
 
 def test_create_session_validation_error(openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'), json={}, status_code=400)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
         openvidu_instance.create_session(media_mode="asd")
@@ -205,24 +174,26 @@ def test_create_session_validation_error(openvidu_instance, requests_mock):
 
 
 def test_no_sessions(openvidu_instance, requests_mock):
-    original = {"numberOfElements": 0, "content": []}
+    NEW_SESSIONS = {"numberOfElements": 0, "content": []}
 
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=NEW_SESSIONS)
 
     is_changed = openvidu_instance.fetch()
     sessions = openvidu_instance.sessions
 
+    assert a.called_once
     assert is_changed
     assert len(sessions) == 0
 
 
 def test_no_sessions_session_count(openvidu_instance, requests_mock):
-    original = {"numberOfElements": 0, "content": []}
+    NEW_SESSIONS = {"numberOfElements": 0, "content": []}
 
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=NEW_SESSIONS)
 
     is_changed = openvidu_instance.fetch()
 
+    assert a.called_once
     assert is_changed
     assert openvidu_instance.session_count == 0
 
@@ -245,25 +216,34 @@ def test_fetching_nothing_happened(openvidu_instance):
 def test_fetching_deleted(openvidu_instance, requests_mock):
     session_before_delete = openvidu_instance.get_session('TestSession')
 
-    original = {"numberOfElements": 0, "content": []}
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
+    NEW_SESSIONS = {"numberOfElements": 0, "content": []}
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=NEW_SESSIONS)
+    b = requests_mock.get(urljoin(URL_BASE, 'sessions/TestSession'), status_code=404)
 
     is_changed = openvidu_instance.fetch()
+    assert a.called_once
 
-    assert not session_before_delete.is_valid
     assert is_changed
 
+    # The session should still report valid state, because it did not get fetched
+    assert session_before_delete.is_valid
+
     with pytest.raises(OpenViduSessionDoesNotExistsError):
+        # the api returns 404
         session_before_delete.fetch()
+
+    assert b.called_once
+    # Since fetch called, this session shouldn't be valid anymore
+    assert not session_before_delete.is_valid
 
 
 def test_access_after_close_without_fetch(openvidu_instance, requests_mock):
     session_to_close = openvidu_instance.get_session('TestSession')
-    a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession'), status_code=204)
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession'), status_code=204)
 
     session_to_close.close()
 
-    assert a.called
+    assert a.called_once
 
     with pytest.raises(OpenViduSessionDoesNotExistsError):
         openvidu_instance.get_session('TestSession')
@@ -271,11 +251,11 @@ def test_access_after_close_without_fetch(openvidu_instance, requests_mock):
 
 def test_inlist_after_close_without_fetch(openvidu_instance, requests_mock):
     session_to_close = openvidu_instance.get_session('TestSession')
-    a = requests_mock.delete(urljoin(URL_BASE, 'api/sessions/TestSession'), status_code=204)
+    a = requests_mock.delete(urljoin(URL_BASE, 'sessions/TestSession'), status_code=204)
 
     session_to_close.close()
 
-    assert a.called
+    assert a.called_once
 
     assert len(openvidu_instance.sessions) == 1
     assert openvidu_instance.session_count == 1
@@ -284,59 +264,86 @@ def test_inlist_after_close_without_fetch(openvidu_instance, requests_mock):
 def test_fetching_changed(openvidu_instance, requests_mock):
     session_before_change = openvidu_instance.get_session('TestSession')
 
-    assert session_before_change.connection_count == 3
+    assert session_before_change.connection_count == SESSIONS['content'][0]['connections']['numberOfElements']
 
-    original = deepcopy(SESSIONS)  # Deep copy
-    original['content'][0]['connections']['numberOfElements'] = 4
-    original['content'][0]['connections']['content'].append(
-        {"connectionId": "vhdxz7a3bfirh2lh", "createdAt": 1538482606412, "location": "",
-         "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-         "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
-         "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
-            {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-             "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
-                              "typeOfVideo": "CAMERA", "frameRate": 30,
-                              "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
-         "subscribers": []})
+    NEW_SESSIONS = deepcopy(SESSIONS)  # Deep copy
+    new_connection = {
+        "id": "con_Xnxg19tonh",
+        "object": "connection",
+        "type": "WEBRTC",
+        "status": "pending",
+        "sessionId": "ses_YnDaGYNcd7",
+        "createdAt": 1538481999022,
+        "activeAt": 1538481999843,
+        "platform": "Chrome 85.0.4183.102 on Linux 64-bit",
+        "token": "wss://localhost:4443?sessionId=TestSession&token=tok_AVe8o7iltWqtijyl&role=PUBLISHER&version=2.16.0&coturnIp=localhost&turnUsername=M2ALIY&turnCredential=7kfjy2",
+        "serverData": "My Server Data",
+        "clientData": "",
+        "record": False,
+        "role": "PUBLISHER",
+        "kurentoOptions": {
+            "videoMaxRecvBandwidth": 1000,
+            "videoMinRecvBandwidth": 300,
+            "videoMaxSendBandwidth": 1000,
+            "videoMinSendBandwidth": 300,
+            "allowedFilters": [
+                "GStreamerFilter",
+                "ZBarFilter"
+            ]
+        },
+        "publishers": [
 
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
+        ],
+        "subscribers": [
+
+        ]
+    }
+
+    NEW_SESSIONS['content'][0]['connections']['content'].append(new_connection)
+    NEW_SESSIONS['content'][0]['connections']['numberOfElements'] = len(NEW_SESSIONS['content'][0]['connections']['content'])
+
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=NEW_SESSIONS)
 
     is_changed = openvidu_instance.fetch()
 
-    assert session_before_change.connection_count == 4
+    assert a.called_once
     assert is_changed
+
+    # fetch() was not called on the session object, so it should not change
+    assert session_before_change.connection_count == SESSIONS['content'][0]['connections']['numberOfElements']
 
 
 def test_fetching_new(openvidu_instance, requests_mock):
-    assert openvidu_instance.session_count == 2
+    assert openvidu_instance.session_count == SESSIONS['numberOfElements']
 
-    original = deepcopy(SESSIONS)
-    original['numberOfElements'] = 3
-    original['content'].append(
-        {"sessionId": "TestSession3", "createdAt": 1538482606338, "mediaMode": "ROUTED", "recordingMode": "MANUAL",
-         "defaultOutputMode": "COMPOSED", "defaultRecordingLayout": "BEST_FIT", "customSessionId": "TestSession",
-         "connections": {"numberOfElements": 2, "content": [
-             {"connectionId": "vhdxz7abbfirh2lh", "createdAt": 1538482606412, "location": "",
-              "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-              "token": "wss://localhost:4443?sessionId=TestSession&token=2ezkertrimk6nttk&role=PUBLISHER&turnUsername=H0EQLL&turnCredential=kjh48u",
-              "role": "PUBLISHER", "serverData": "", "clientData": "TestClient1", "publishers": [
-                 {"createdAt": 1538482606976, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-                  "mediaOptions": {"hasAudio": True, "audioActive": True, "hasVideo": True, "videoActive": True,
-                                   "typeOfVideo": "CAMERA", "frameRate": 30,
-                                   "videoDimensions": "{\"width\":640,\"height\":480}", "filter": {}}}],
-              "subscribers": []}, {"connectionId": "maxawd3ysuj1rxvq", "createdAt": 1538482607659, "location": "",
-                                   "platform": "Chrome 69.0.3497.100 on Linux 64-bit",
-                                   "token": "wss://localhost:4443?sessionId=TestSession&token=ovj1b4ysuqmcirti&role=PUBLISHER&turnUsername=INOAHN&turnCredential=oujrqd",
-                                   "role": "PUBLISHER", "serverData": "", "clientData": "TestClient2", "publishers": [],
-                                   "subscribers": [
-                                       {"createdAt": 1538482607799, "streamId": "vhdxz7abbfirh2lh_CAMERA_CLVAU",
-                                        "publisher": "vhdxz7abbfirh2lh"}]}]}, "recording": False})
+    new_session = {
+        "id": "TestSession3",
+        "object": "session",
+        "createdAt": 1538481996019,
+        "mediaMode": "RELAYED",
+        "recordingMode": "MANUAL",
+        "defaultOutputMode": "COMPOSED",
+        "defaultRecordingLayout": "CUSTOM",
+        "defaultCustomLayout": "",
+        "customSessionId": "TestSession3",
+        "connections": {
+            "numberOfElements": 0,
+            "content": []
+        },
+        "recording": False
+    }
 
-    requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=original)
+    NEW_SESSIONS = deepcopy(SESSIONS)
+
+    NEW_SESSIONS['content'].append(new_session)
+    NEW_SESSIONS['numberOfElements'] = len(NEW_SESSIONS['content'])
+
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=NEW_SESSIONS)
 
     is_changed = openvidu_instance.fetch()
 
-    assert openvidu_instance.session_count == 3
+    assert a.called_once
+    assert openvidu_instance.session_count == NEW_SESSIONS['numberOfElements']
     assert openvidu_instance.get_session('TestSession3').id == 'TestSession3'
     assert is_changed
 
@@ -346,10 +353,10 @@ def test_fetching_new(openvidu_instance, requests_mock):
 #
 
 def test_empty_with_no_fetch(requests_mock):
-    a = requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=SESSIONS)
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=SESSIONS)
     openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False)
 
-    assert not a.called
+    assert not a.called_once
 
     assert openvidu_instance.sessions == []
     assert openvidu_instance.session_count == 0
@@ -361,79 +368,98 @@ def test_proper_error_with_no_fetch(no_fetch_openvidu_instance):
 
 
 def test_new_session_proper_working_with_no_fetch(no_fetch_openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'),
-                           json={"id": "zfgmthb8jl9uellk", "createdAt": 1538481996019})
+    new_session = {
+        "id": "TestSession3",
+        "object": "session",
+        "createdAt": 1538481996019,
+        "mediaMode": "ROUTED",
+        "recordingMode": "MANUAL",
+        "defaultOutputMode": "COMPOSED",
+        "defaultRecordingLayout": "CUSTOM",
+        "defaultCustomLayout": "",
+        "customSessionId": "TestSession3",
+        "connections": {
+            "numberOfElements": 0,
+            "content": []
+        },
+        "recording": False
+    }
+
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json=new_session)
 
     NEW_SESSIONS = deepcopy(SESSIONS)
-    NEW_SESSIONS['content'].append({"sessionId": "zfgmthb8jl9uellk",
-                                    "createdAt": 1538481996019,
-                                    "mediaMode": "ROUTED",
-                                    "recordingMode": "MANUAL",
-                                    "defaultOutputMode": "COMPOSED",
-                                    "defaultRecordingLayout": "BEST_FIT",
-                                    "customSessionId": "TestSession",
-                                    "connections": {"numberOfElements": 0, "content": []},
-                                    "recording": False})
+    NEW_SESSIONS['content'].append(new_session)
+
     NEW_SESSIONS['numberOfElements'] = len(NEW_SESSIONS['content'])
 
-    b = requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=NEW_SESSIONS)
+    b = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=NEW_SESSIONS)
 
     session = no_fetch_openvidu_instance.create_session()
 
-    assert session.id == "zfgmthb8jl9uellk"
-    assert a.called
-    assert b.called
+    assert session.id == "TestSession3"
+    assert a.called_once
+    assert not b.called_once  # Nofetch (as of 2.16.0)
 
     assert a.last_request.json() == {}
 
 
 def test_create_session_extra_proper_working_with_no_fetch(no_fetch_openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'),
-                           json={"id": "DerpyIsBestPony", "createdAt": 1538481996019})
+    new_session = {
+        "id": "DerpyIsBestPony",
+        "object": "session",
+        "createdAt": 1538481996019,
+        "mediaMode": "RELAYED",
+        "recordingMode": "MANUAL",
+        "defaultOutputMode": "COMPOSED",
+        "defaultRecordingLayout": "CUSTOM",
+        "defaultCustomLayout": "",
+        "customSessionId": "DerpyIsBestPony",
+        "connections": {
+            "numberOfElements": 0,
+            "content": []
+        },
+        "recording": False
+    }
+
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json=new_session)
 
     NEW_SESSIONS = deepcopy(SESSIONS)
-    NEW_SESSIONS['content'].append({"sessionId": "DerpyIsBestPony",
-                                    "createdAt": 1538481996019,
-                                    "mediaMode": "RELAYED",
-                                    "recordingMode": "MANUAL",
-                                    "defaultOutputMode": "COMPOSED",
-                                    "defaultRecordingLayout": "BEST_FIT",
-                                    "customSessionId": "TestSession",
-                                    "connections": {"numberOfElements": 0, "content": []},
-                                    "recording": False})
+    NEW_SESSIONS['content'].append(new_session)
+
     NEW_SESSIONS['numberOfElements'] = len(NEW_SESSIONS['content'])
 
-    b = requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=NEW_SESSIONS)
+    b = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=NEW_SESSIONS)
 
     session = no_fetch_openvidu_instance.create_session('DerpyIsBestPony', 'RELAYED')
 
     assert session.id == "DerpyIsBestPony"
-    assert a.called
-    assert b.called
+    assert a.called_once
+    assert not b.called  # A subsequent fetch should not be called (since 2.16.0)
 
     assert a.last_request.json() == {"mediaMode": 'RELAYED', "customSessionId": 'DerpyIsBestPony'}
 
 
+
 def test_create_session_conflict_proper_working_with_no_fetch(no_fetch_openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'), json={}, status_code=409)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json={}, status_code=409)
 
     with pytest.raises(OpenViduSessionExistsError):
         no_fetch_openvidu_instance.create_session('TestSession')
 
-    assert a.called
+    assert a.called_once
 
 
 def test_create_session_bad_parameters_proper_working_with_no_fetch(no_fetch_openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'), json={}, status_code=400)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
         no_fetch_openvidu_instance.create_session()
 
-    assert a.called
+    assert a.called_once
 
 
 def test_create_session_validation_error_proper_working_with_no_fetch(no_fetch_openvidu_instance, requests_mock):
-    a = requests_mock.post(urljoin(URL_BASE, 'api/sessions'), json={}, status_code=400)
+    a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json={}, status_code=400)
 
     with pytest.raises(ValueError):
         no_fetch_openvidu_instance.create_session(media_mode="asd")
@@ -442,10 +468,10 @@ def test_create_session_validation_error_proper_working_with_no_fetch(no_fetch_o
 
 
 def test_fetch_with_no_fetch(no_fetch_openvidu_instance, requests_mock):
-    a = requests_mock.get(urljoin(URL_BASE, 'api/sessions'), json=SESSIONS)
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions'), json=SESSIONS)
     is_changed = no_fetch_openvidu_instance.fetch()
 
-    assert a.called
+    assert a.called_once
     assert is_changed == True
 
     sessions = no_fetch_openvidu_instance.sessions
@@ -459,12 +485,12 @@ def test_timeout(requests_mock):
     openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False, timeout=2)
 
     # This will always raise the exception, regardless if timeout is set or not
-    a = requests_mock.get(urljoin(URL_BASE, 'api/sessions'), exc=requests.exceptions.ConnectTimeout)
+    a = requests_mock.get(urljoin(URL_BASE, 'sessions'), exc=requests.exceptions.ConnectTimeout)
 
     with pytest.raises(requests.exceptions.ConnectTimeout):
         openvidu_instance.fetch()
 
-    assert a.called
+    assert a.called_once
 
 
 def test_timeout2_int(mocker):

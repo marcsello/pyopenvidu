@@ -12,8 +12,7 @@ class OpenViduPublisher(object):
     session_id: str
     stream_id: str
     created_at: datetime
-    media_options: dict
-    rtsp_uri: Optional[str]
+    media_options: Optional[dict]
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
         """
@@ -25,8 +24,7 @@ class OpenViduPublisher(object):
         self.session_id = session_id
         self.stream_id = data['streamId']
         self.created_at = datetime.utcfromtimestamp(data['createdAt'] / 1000.0)
-        self.media_options = data['mediaOptions']
-        self.rtsp_uri = data.get('rtspUri', None)
+        self.media_options = data.get('mediaOptions')
 
     def force_unpublish(self):
         """
@@ -34,9 +32,9 @@ class OpenViduPublisher(object):
         After this call, the instace of the object, and the parent OpenViduConnection instance should be considered invalid.
         Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
 
-        https://docs.openvidu.io/en/2.12.0/reference-docs/REST-API/#delete-apisessionsltsession_idgtstreamltstream_idgt
+        https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#delete-openviduapisessionsltsession_idgtstreamltstream_idgt
         """
-        r = self._session.delete(f"api/sessions/{self.session_id}/stream/{self.stream_id}")
+        r = self._session.delete(f"sessions/{self.session_id}/stream/{self.stream_id}")
         if r.status_code == 404:
             raise OpenViduStreamDoesNotExistsError()
         if r.status_code == 400:

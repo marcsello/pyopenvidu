@@ -11,7 +11,7 @@ Doing so will cause the newly created `OpenVidu` object to not know anything abo
 Not even knowing if it's possible to connect to it.
 
 Without fetching it is still possible to use the following methods:
- * `create_session()`: No state information is required to start a new session (existance of the session is validated by the server). Also, creating a new room will call `fetch()` in the background to recieve the informations of the new session.
+ * `create_session()`: No state information is required to start a new session (existance of the session is validated by the server).
  * `get_config()`: The configuration of the server is not stored at all, so this call will always request this from the server.
  * `fetch()`: Well, that one is kind of obvious.
 
@@ -19,7 +19,7 @@ If you are confident that's something you need. You can use this to reduce the n
  * You are making something, that calls `fetch()` before every operation anyways. This would make an initial fetch pointless, so you can disable it.
  * It is not possible to connect to the `OpenVidu` server during the object creation. Later you will call `fetch()` when it's possible.
  * After creating the `OpenVidu` object you will call `fetch()` instantly.
- * Your program will create a session as soon as the `OpenVidu` object created. Because the way `OpenVidu` works, this will do a subsequent `fetch()` call anyways.
+ * Your program will create a session as soon as the `OpenVidu` object created, and only use that.
  * All you need is getting the config using `get_config()`.
 
 Timeouts
