@@ -59,12 +59,12 @@ Well this is not a breaking change, but it's important to mention. As of OpenVid
 This made it possible to implement `fetch()` for the connection object as well.
 
 
-Base URL must include the `/api` part
+Base URL must include the `/api/` part
 `````````````````````````````````````
-Originally the `/api` part was appended to the base url by the library itself. This was needed because there was a single endpoint which could not be reached under `/api` (`config`). But with OpenVidu release 2.16.0 this endpoint was moved bellow `/api`.
+Originally the `/api/` part was appended to the base url by the library itself. This was needed because there was a single endpoint which could not be reached under `/api` (`config`). But with OpenVidu release 2.16.0 this endpoint was moved bellow `/api`.
 This allows more freedom of your reverse proxy and server configuration.
 
-If you previously passed `https://my.openvidu.instance.com:4443/` to the constructor of the `OpenVidu` object. Now you have to pass `https://my.openvidu.instance.com:4443/openvidu/api`. (The `/openvidu/` part was added in the new release of OpenVidu as well)
+If you previously passed `https://my.openvidu.instance.com:4443/` to the constructor of the `OpenVidu` object. Now you have to pass `https://my.openvidu.instance.com:4443/openvidu/api/`. (The `/openvidu/` part was added in the new release of OpenVidu as well)
 
 Creating a new session no longer does an internal fetch() call
 ``````````````````````````````````````````````````````````````

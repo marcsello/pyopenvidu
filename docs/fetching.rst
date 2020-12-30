@@ -71,7 +71,7 @@ Reasons
 
 The reason behind this architecture is mainly comes from the fact, that the original Java library, that this library took inspiration from uses the same solution.
 
-Because the OpenVidu server does not expose other endpoints than `GET /api/sessions`, `GET /api/sessions/<SESSION_ID>` and `GET /api/sessions/<SESSION_ID>/connections/<CONNECTION_ID>` by making every object "dynamic" would cause a lot of network overhead by transfering the unwanted information (e.g.: updating a Subscriber object would cause downloading all session data and using only a fraction of it).
+Because the OpenVidu server does not expose other endpoints than `GET sessions`, `GET sessions/<SESSION_ID>` and `GET sessions/<SESSION_ID>/connections/<CONNECTION_ID>` by making every object "dynamic" would cause a lot of network overhead by transfering the unwanted information (e.g.: updating a Subscriber object would cause downloading all session data and using only a fraction of it).
 
 Another approach would be to not have an internal representation at all, meaning that every method of every object would cause an API call in the background.
 This would be a bad idea for the following reasons:
