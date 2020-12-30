@@ -2,6 +2,15 @@
 History
 =======
 
+0.2.0 (2020-12-30)
+------------------
+
+* Implemented OpenVidu REST API version 2.16.0.
+* Removed inter-object update
+* Changed Base URL
+* Removed broken "Thread safety" approach
+* See the "Migrating" section of the documentation on how to update your code.
+
 0.1.4 (2020-05-24)
 ------------------
 

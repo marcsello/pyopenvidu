@@ -123,7 +123,5 @@ Make sure all your changes are committed (including an entry in HISTORY.rst).
 Then run::
 
     $ bump2version patch # possible: major / minor / patch
-    $ git push
-    $ git push --tags
 
-Travis will then deploy to PyPI if tests pass.
+After this, merge dev into master, and create a tag with the version as name. Travis will then deploy to PyPI if tests pass.

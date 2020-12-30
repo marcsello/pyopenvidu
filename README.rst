@@ -33,7 +33,6 @@ Features
 
 * Use OpenVidu API objects as native Python objects
 * Supports Python 3.7 and above
-* Thread safe interface
 * Depends on nothing more than `requests` and `requests-toolbelt`
 
 Credits
