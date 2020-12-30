@@ -26,7 +26,7 @@ Python interface to the OpenVidu_ WebRTC videoconverence library.
 
 * Free software: MIT license
 * Documentation: https://pyopenvidu.readthedocs.io.
-
+* Flask extension: https://pypi.org/project/flask-openvidu/
 
 Features
 --------
