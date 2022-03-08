@@ -1,5 +1,5 @@
 """OpenVidu class."""
-from typing import List, Union
+from typing import List, Union, Optional
 from functools import partial
 
 from requests_toolbelt.sessions import BaseUrlSession
@@ -16,12 +16,15 @@ class OpenVidu(object):
     This object represents a OpenVidu server instance.
     """
 
-    def __init__(self, url: str, secret: str, initial_fetch: bool = True, timeout: Union[int, tuple, None] = None):
+    def __init__(self, url: str, secret: str, initial_fetch: bool = True, timeout: Union[int, tuple, None] = None,
+                 verify: Optional[Union[str, bool]] = None, cert: Optional[Union[tuple, str]] = None):
         """
         :param url: The url to reach your OpenVidu Server instance. Typically something like https://localhost:4443/
         :param secret: Secret for your OpenVidu Server
         :param initial_fetch: Enable the initial fetching on object creation. Defaults to `True`. If set to `False` a `fetc()` must be called before doing anything with the object. In most scenarios you won't need to change this.
         :param timeout: Set timeout to all Requests to the OpenVidu server. Default: None = No timeout. See https://2.python-requests.org/en/latest/user/advanced/#timeouts for possible values.
+        :param verify: Set the `verify` property of the underlying requests call. See https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification.
+        :param cert: Set the `cert` property of the underlying requests call. See https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         """
         self._session = BaseUrlSession(base_url=url)
         self._session.auth = HTTPBasicAuth('OPENVIDUAPP', secret)
@@ -29,6 +32,9 @@ class OpenVidu(object):
         self._session.headers.update({
             'User-Agent': user_agent('PyOpenVidu', __version__)
         })
+
+        self._session.verify = verify
+        self._session.cert = cert
 
         self._session.request = partial(self._session.request, timeout=timeout)
 
