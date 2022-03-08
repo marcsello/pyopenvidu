@@ -89,7 +89,13 @@ html_theme = 'alabaster'
 # theme further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    "github_user": "marcsello",
+    "github_repo": "pyopenvidu",
+    "github_banner": True,
+    "show_related": False,
+    "github_type": "star"
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
