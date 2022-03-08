@@ -57,9 +57,12 @@ class OpenViduSession(object):
 
     def fetch(self):
         """
-        Updates every property of the OpenViduSession with the current status it has in OpenVidu Server. This is especially useful for getting the list of active connections to the OpenViduSession trough the `connections` property.
+        Updates every property of the OpenViduSession with the current status it has in OpenVidu Server.
+        This is especially useful for getting the list of active connections
+        to the OpenViduSession through the `connections` property.
 
-        :return: True if the OpenViduSession status has changed with respect to the server, False if not. This applies to any property or sub-property of the object
+        :return: True if the OpenViduSession status has changed with respect to the server, False if not.
+            This applies to any property or sub-property of the object
         """
 
         r = self._session.get(f"sessions/{self.id}")
@@ -115,9 +118,12 @@ class OpenViduSession(object):
 
         https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#post-openviduapisignal
 
-        :param type_: Type of the signal. In the body example of the table above, only users subscribed to Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal') will trigger signals of any type.
+        :param type_: Type of the signal. In the body example of the table above, only users subscribed to
+            Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal')
+            will trigger signals of any type.
         :param data: Actual data of the signal.
-        :param to: List of OpenViduConnection objects to which you want to send the signal. If this property is not set (None) the signal will be sent to all participants of the session.
+        :param to: List of OpenViduConnection objects to which you want to send the signal.
+            If this property is not set (None) the signal will be sent to all participants of the session.
         """
 
         if not self.is_valid:  # Fail early... and always
@@ -171,17 +177,23 @@ class OpenViduSession(object):
         """
         Creates a new Connection object of WEBRTC (Regular user) type to the session.
 
-        In the video bandwidth settings 0 means unconstrained. Setting any of them (other than None) overrides the values configured in for the server.
+        In the video bandwidth settings 0 means unconstrained. Setting any of them (other than None) overrides
+        the values configured in for the server.
 
         https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#post-openviduapisessionsltsession_idgtconnection
 
         :param role: Allowed values: `SUBSCRIBER`, `PUBLISHER` or `MODERATOR`
         :param data: metadata associated to this token (usually participant's information)
-        :param video_max_recv_bandwidth: Maximum number of Kbps that the client owning the token will be able to receive from Kurento Media Server.
-        :param video_min_recv_bandwidth: Minimum number of Kbps that the client owning the token will try to receive from Kurento Media Server.
-        :param video_max_send_bandwidth: Maximum number of Kbps that the client owning the token will be able to send to Kurento Media Server.
-        :param video_min_send_bandwidth: Minimum number of Kbps that the client owning the token will try to send to Kurento Media Server.
-        :param allowed_filters: Array of strings containing the names of the filters the user owning the token will be able to apply.
+        :param video_max_recv_bandwidth: Maximum number of Kbps that the client owning the token
+            will be able to receive from Kurento Media Server.
+        :param video_min_recv_bandwidth: Minimum number of Kbps that the client owning the token
+            will try to receive from Kurento Media Server.
+        :param video_max_send_bandwidth: Maximum number of Kbps that the client owning the token
+            will be able to send to Kurento Media Server.
+        :param video_min_send_bandwidth: Minimum number of Kbps that the client owning the token
+            will try to send to Kurento Media Server.
+        :param allowed_filters: Array of strings containing the names of the filters the user owning the token
+            will be able to apply.
         :return: An OpenVidu connection object represents the newly created connection.
         """
 
@@ -225,8 +237,8 @@ class OpenViduSession(object):
         """
         Publishes a new IPCAM rtsp stream to the session.
 
-        Unlike `OpenVidu.create_session` this method does not call fetch() automatically, since the server returns enough data to construct the connection object.
-        Keep in mind, that if you want the newly created Connection to appear in the `connections` list, you should call fetch() before accessing the list!
+        Keep in mind, that if you want the newly created Connection to appear in the `connections` list,
+        you should call fetch() before accessing the list!
 
         https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#post-openviduapisessionsltsession_idgtconnection
 
