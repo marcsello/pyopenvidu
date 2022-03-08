@@ -61,7 +61,7 @@ class OpenViduConnection(object):
 
     def __init__(self, session: BaseUrlSession, data: dict):
         """
-        This is meant for internal use, thus you should not call it.
+        Direct instantiation of this class is not supported!
         Use `OpenViduSession.connections` to get an instance of this class.
         """
 

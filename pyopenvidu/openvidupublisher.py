@@ -16,7 +16,7 @@ class OpenViduPublisher(object):
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
         """
-        This is meant for internal use, thus you should not call it.
+        Direct instantiation of this class is not supported!
         Use `OpenViduConnection.publishers` to get an instance of this class.
         """
 
