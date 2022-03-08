@@ -544,7 +544,7 @@ def test_set_verify(mocker):
 
     # default should be None
     openvidu_instance_none = OpenVidu(URL_BASE, SECRET, initial_fetch=False)
-    assert openvidu_instance_none._session.verify == None
+    assert openvidu_instance_none._session.verify is None
 
 
 def test_set_cert(mocker):
@@ -555,4 +555,4 @@ def test_set_cert(mocker):
 
     # default should be None
     openvidu_instance_none = OpenVidu(URL_BASE, SECRET, initial_fetch=False)
-    assert openvidu_instance_none._session.cert == None
+    assert openvidu_instance_none._session.cert is None
