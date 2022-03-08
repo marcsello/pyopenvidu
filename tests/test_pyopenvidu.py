@@ -439,7 +439,6 @@ def test_create_session_extra_proper_working_with_no_fetch(no_fetch_openvidu_ins
     assert a.last_request.json() == {"mediaMode": 'RELAYED', "customSessionId": 'DerpyIsBestPony'}
 
 
-
 def test_create_session_conflict_proper_working_with_no_fetch(no_fetch_openvidu_instance, requests_mock):
     a = requests_mock.post(urljoin(URL_BASE, 'sessions'), json={}, status_code=409)
 
@@ -481,7 +480,12 @@ def test_fetch_with_no_fetch(no_fetch_openvidu_instance, requests_mock):
     assert sessions[1].id == "TestSession2"
 
 
-def test_timeout(requests_mock):
+#
+# Setters
+#
+
+
+def test_set_timeout(requests_mock):
     openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False, timeout=2)
 
     # This will always raise the exception, regardless if timeout is set or not
@@ -493,7 +497,7 @@ def test_timeout(requests_mock):
     assert a.called_once
 
 
-def test_timeout2_int(mocker):
+def test_set_timeout2_int(mocker):
     # So we test if the value properly set
     openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False, timeout=2)
 
@@ -506,7 +510,7 @@ def test_timeout2_int(mocker):
     assert kwargs['timeout'] == 2
 
 
-def test_timeout2_tuple(mocker):
+def test_set_timeout2_tuple(mocker):
     # So we test if the value properly set
     openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False, timeout=(1, 2))
 
@@ -517,3 +521,38 @@ def test_timeout2_tuple(mocker):
     args, kwargs = requests.Session.request.call_args
 
     assert kwargs['timeout'] == (1, 2)
+
+
+def test_set_base_url(mocker):
+    # So we test if the value properly set
+    openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False)
+
+    mocker.patch.object(requests.Session, "request", autospec=True)
+
+    openvidu_instance.fetch()
+
+    args, kwargs = requests.Session.request.call_args
+
+    assert args[2].startswith(URL_BASE)
+
+
+def test_set_verify(mocker):
+    # So we test if the value properly set
+    for val in [True, False, None, "/nonexistent/test.pem"]:
+        openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False, verify=val)
+        assert openvidu_instance._session.verify == val
+
+    # default should be None
+    openvidu_instance_none = OpenVidu(URL_BASE, SECRET, initial_fetch=False)
+    assert openvidu_instance_none._session.verify == None
+
+
+def test_set_cert(mocker):
+    # So we test if the value properly set
+    for val in [None, "/nonexistent/test.pem", ('/nonexistent/cert.crt', '/nonexistent/cert.key')]:
+        openvidu_instance = OpenVidu(URL_BASE, SECRET, initial_fetch=False, cert=val)
+        assert openvidu_instance._session.cert == val
+
+    # default should be None
+    openvidu_instance_none = OpenVidu(URL_BASE, SECRET, initial_fetch=False)
+    assert openvidu_instance_none._session.cert == None
