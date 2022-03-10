@@ -61,7 +61,7 @@ class OpenViduConnection(object):
 
     def __init__(self, session: BaseUrlSession, data: dict):
         """
-        This is meant for internal use, thus you should not call it.
+        Direct instantiation of this class is not supported!
         Use `OpenViduSession.connections` to get an instance of this class.
         """
 
@@ -73,7 +73,8 @@ class OpenViduConnection(object):
         """
         Updates every property of the connection object.
 
-        :return: true if the Connection object status has changed with respect to the server, false if not. This applies to any property or sub-property of the object.
+        :return: true if the Connection object status has changed with respect to the server, false if not.
+            This applies to any property or sub-property of the object.
         """
 
         if not self.is_valid:
@@ -102,7 +103,7 @@ class OpenViduConnection(object):
     def force_disconnect(self):
         """
         Forces the disconnection from the session.
-        Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
+        Remember to call fetch() after this call to fetch the current properties of the Session from OpenVidu Server!
 
         https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#delete-openviduapisessionsltsession_idgtconnectionltconnection_idgt
         """
@@ -126,7 +127,9 @@ class OpenViduConnection(object):
 
         https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#post-openviduapisignal
 
-        :param type_: Type of the signal. In the body example of the table above, only users subscribed to Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal') will trigger signals of any type.
+        :param type_: Type of the signal. In the body example of the table above, only users subscribed to
+            Session.on('signal:MY_TYPE') will trigger that signal. Users subscribed to Session.on('signal')
+            will trigger signals of any type.
         :param data: Actual data of the signal.
         """
         if not self.is_valid:
@@ -157,9 +160,10 @@ class OpenViduConnection(object):
 
     def force_unpublish_all_streams(self):
         """
-        Forces the user to unpublish all of their Stream. OpenVidu Browser will trigger the proper events on the client-side (streamDestroyed) with reason set to "forceUnpublishByServer".
-        After this call, the instace of the object, should be considered invalid.
-        Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
+        Forces the user to unpublish all of their Stream. OpenVidu Browser will trigger the proper events on the
+        client-side (streamDestroyed) with reason set to "forceUnpublishByServer". After this call, the instance of
+        the object, should be considered invalid. Remember to call fetch() after this call to fetch the actual
+        properties of the Session from OpenVidu Server!
 
         https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#delete-openviduapisessionsltsession_idgtstreamltstream_idgt
         """

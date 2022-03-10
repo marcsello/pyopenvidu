@@ -2,6 +2,13 @@
 History
 =======
 
+0.2.1 (2022-03-10)
+------------------
+
+* Added `cert` and `verify` options to the OpenVidu object constructor.
+* Various fixes in the documentation
+* Included Python 3.10 in the test suite
+
 0.2.0 (2020-12-30)
 ------------------
 

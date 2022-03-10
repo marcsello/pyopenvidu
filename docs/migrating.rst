@@ -60,7 +60,7 @@ This made it possible to implement `fetch()` for the connection object as well.
 
 
 Base URL must include the `/api/` part
-`````````````````````````````````````
+``````````````````````````````````````
 Originally the `/api/` part was appended to the base url by the library itself. This was needed because there was a single endpoint which could not be reached under `/api` (`config`). But with OpenVidu release 2.16.0 this endpoint was moved bellow `/api`.
 This allows more freedom of your reverse proxy and server configuration.
 

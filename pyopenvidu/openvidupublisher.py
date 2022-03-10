@@ -16,7 +16,7 @@ class OpenViduPublisher(object):
 
     def __init__(self, session: BaseUrlSession, session_id: str, data: dict):
         """
-        This is meant for internal use, thus you should not call it.
+        Direct instantiation of this class is not supported!
         Use `OpenViduConnection.publishers` to get an instance of this class.
         """
 
@@ -28,9 +28,10 @@ class OpenViduPublisher(object):
 
     def force_unpublish(self):
         """
-        Forces some user to unpublish a Stream. OpenVidu Browser will trigger the proper events on the client-side (streamDestroyed) with reason set to "forceUnpublishByServer".
-        After this call, the instace of the object, and the parent OpenViduConnection instance should be considered invalid.
-        Remember to call fetch() after this call to fetch the current actual properties of the Session from OpenVidu Server!
+        Forces some user to unpublish a Stream. OpenVidu Browser will trigger the proper events on the client-side
+        (streamDestroyed) with reason set to "forceUnpublishByServer". After this call, the instace of the object
+        and the parent OpenViduConnection instance should be considered invalid. Remember to call fetch() after this
+        call to fetch the current actual properties of the Session from OpenVidu Server!
 
         https://docs.openvidu.io/en/2.16.0/reference-docs/REST-API/#delete-openviduapisessionsltsession_idgtstreamltstream_idgt
         """
