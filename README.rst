@@ -20,7 +20,7 @@ PyOpenVidu
         :target: https://www.codacy.com/manual/marcsello/pyopenvidu?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=marcsello/pyopenvidu&amp;utm_campaign=Badge_Grade
 
 
-Python interface to the OpenVidu_ WebRTC videoconverence library.
+Python interface to the OpenVidu_ WebRTC videoconference framework.
 
 .. _OpenVidu: https://openvidu.io/
 
